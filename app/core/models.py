@@ -52,7 +52,7 @@ class ShoppingList(models.Model):
     title = models.CharField(max_length=255)
     description = models.TextField(blank=True)
     additional_users = models.ManyToManyField(
-        settings.AUTH_USER_MODEL, related_name="additional_users"
+        settings.AUTH_USER_MODEL, related_name="additional_users", blank=True
     )
 
     def __str__(self):
