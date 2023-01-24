@@ -51,7 +51,9 @@ class ShoppingList(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     title = models.CharField(max_length=255)
     description = models.TextField(blank=True)
-    additional_users = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name="additional_users")
+    additional_users = models.ManyToManyField(
+        settings.AUTH_USER_MODEL, related_name="additional_users"
+    )
 
     def __str__(self):
         return self.title
