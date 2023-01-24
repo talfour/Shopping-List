@@ -15,7 +15,7 @@ from shopping_list import serializers
 class ShoppingListViewSet(viewsets.ModelViewSet):
     """View for manage shopping list APIs."""
 
-    serializer_class = serializers.ShoppingListSerializer
+    serializer_class = serializers.ShoppingListDetailSerializer
     queryset = ShoppingList.objects.all()
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
@@ -25,3 +25,10 @@ class ShoppingListViewSet(viewsets.ModelViewSet):
         return self.queryset.filter(
             Q(user=self.request.user) | Q(additional_users=self.request.user)
         ).order_by("-id")
+
+    def get_serializer_class(self):
+        """Return the serializer class for request."""
+        if self.action == "list":
+            return serializers.ShoppingListSerializer
+
+        return self.serializer_class
