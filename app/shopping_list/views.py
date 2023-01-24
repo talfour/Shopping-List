@@ -32,3 +32,7 @@ class ShoppingListViewSet(viewsets.ModelViewSet):
             return serializers.ShoppingListSerializer
 
         return self.serializer_class
+
+    def perform_create(self, serializer):
+        """Create a new shopping list"""
+        serializer.save(user=self.request.user)
