@@ -11,6 +11,7 @@ from rest_framework import status
 
 CREATE_USER_URL = reverse("user:create")
 TOKEN_URL = reverse("user:token-obtain")
+ME_URL = reverse("user:me")
 
 
 def create_user(**params):
@@ -92,3 +93,40 @@ class PublicUserApiTests(TestCase):
         self.assertNotIn("access", res.data)
         self.assertNotIn("refresh", res.data)
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_refresh_token_gives_new_access(self):
+        """Test generates a new token when refresh is provided"""
+        user_details = {
+            "name": "Test Name",
+            "email": "test@example.com",
+            "password": "test-user-pass123",
+        }
+        create_user(**user_details)
+
+        payload = {"email": user_details["email"], "password": user_details["password"]}
+        token = self.client.post(TOKEN_URL, payload)
+        refresh = token.data['refresh']
+
+        res = self.client.post(reverse("user:token-refresh"), {'refresh':refresh})
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertIn("access", res.data)
+
+    def test_retrieve_user_unauthorized(self):
+        """Test authentication is required for users."""
+        res = self.client.get(ME_URL)
+
+        self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
+
+
+class PrivateUserApiTests(TestCase):
+    """Test API requests that require authentication."""
+
+    def setUp(self):
+        self.user = create_user(
+            email='test@example.com',
+            password='testpass123',
+            name="Test Name",
+        )
+        self.client = APIClient()
+        self.client.force_authenticate(user=self.user)
+        
