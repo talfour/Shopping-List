@@ -9,11 +9,8 @@ from shopping_list import views
 
 
 router = DefaultRouter()
-router.register('shopping_list', views.ShoppingListViewSet, basename="shopping_list")
+router.register("shopping_list", views.ShoppingListViewSet, basename="shopping_list")
 
 app_name = "shopping_list"
 
-urlpatterns = [
-    path('', include(router.urls))
-]
-
+urlpatterns = [path("", include(router.urls))]
