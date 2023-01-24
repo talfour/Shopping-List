@@ -11,10 +11,18 @@ from rest_framework.test import APIClient
 
 from core.models import ShoppingList
 
-from shopping_list.serializers import ShoppingListSerializer
+from shopping_list.serializers import (
+    ShoppingListSerializer,
+    ShoppingListDetailSerializer,
+)
 
 
 SHOPPING_LIST_URL = reverse("shopping_list:shopping_list-list")
+
+
+def detail_url(shopping_list_id):
+    """Create and return a shopping list detail URL."""
+    return reverse("shopping_list:shopping_list-detail", args=[shopping_list_id])
 
 
 def create_shopping_list(user, **params):
@@ -56,7 +64,7 @@ class PrivateRecipeApiTests(TestCase):
 
         res = self.client.get(SHOPPING_LIST_URL)
 
-        shopping_lists = ShoppingList.objects.all().order_by('-id')
+        shopping_lists = ShoppingList.objects.all().order_by("-id")
         serializer = ShoppingListSerializer(shopping_lists, many=True)
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(res.data, serializer.data)
@@ -64,7 +72,7 @@ class PrivateRecipeApiTests(TestCase):
     def test_shopping_list_limited_to_user(self):
         """Test list of shopping lists are limited to authenticated user."""
         other_user = get_user_model().objects.create_user(
-            'other@example.com', 'pass1234'
+            "other@example.com", "pass1234"
         )
         create_shopping_list(user=other_user)
         create_shopping_list(user=self.user)
@@ -73,7 +81,19 @@ class PrivateRecipeApiTests(TestCase):
         shared_list.additional_users.add(self.user)
         res = self.client.get(SHOPPING_LIST_URL)
 
-        shopping_lists = ShoppingList.objects.filter(Q(user=self.user) | Q(additional_users=self.user))
+        shopping_lists = ShoppingList.objects.filter(
+            Q(user=self.user) | Q(additional_users=self.user)
+        )
         serializer = ShoppingListSerializer(shopping_lists, many=True)
         self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(res.data, serializer.data)
+
+    def test_get_shopping_list_detail(self):
+        """Test get shopping list details."""
+        shopping_list = create_shopping_list(user=self.user)
+
+        url = detail_url(shopping_list.id)
+        res = self.client.get(url)
+
+        serializer = ShoppingListDetailSerializer(shopping_list)
         self.assertEqual(res.data, serializer.data)
