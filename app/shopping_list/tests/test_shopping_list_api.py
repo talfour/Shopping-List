@@ -34,6 +34,11 @@ def create_shopping_list(user, **params):
     return shopping_list
 
 
+def create_user(**params):
+    """Create and return a new user"""
+    return get_user_model().objects.create(**params)
+
+
 class PublicShoppingListAPITests(TestCase):
     """Test unauthenticated API requests."""
 
@@ -52,9 +57,7 @@ class PrivateRecipeApiTests(TestCase):
 
     def setUp(self):
         self.client = APIClient()
-        self.user = get_user_model().objects.create_user(
-            "user@example.com", "testpass2123"
-        )
+        self.user = create_user(email="user@example.com", password="test123")
         self.client.force_authenticate(self.user)
 
     def test_retrieve_shopping_lists(self):
@@ -71,9 +74,7 @@ class PrivateRecipeApiTests(TestCase):
 
     def test_shopping_list_limited_to_user(self):
         """Test list of shopping lists are limited to authenticated user."""
-        other_user = get_user_model().objects.create_user(
-            "other@example.com", "pass1234"
-        )
+        other_user = create_user(email="other@example.com", password="pass1234")
         create_shopping_list(user=other_user)
         create_shopping_list(user=self.user)
 
@@ -97,3 +98,86 @@ class PrivateRecipeApiTests(TestCase):
 
         serializer = ShoppingListDetailSerializer(shopping_list)
         self.assertEqual(res.data, serializer.data)
+
+    def test_create_shopping_list(self):
+        """Test create shopping list"""
+        payload = {"title": "Sample shopping", "description": "Test description"}
+        res = self.client.post(SHOPPING_LIST_URL, payload)
+
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+        shopping_list = ShoppingList.objects.get(id=res.data["id"])
+        for k, v in payload.items():
+            self.assertEqual(getattr(shopping_list, k), v)
+        self.assertEqual(shopping_list.user, self.user)
+
+    def test_partial_update(self):
+        """Test partial update of shopping list"""
+        original_description = "test original"
+        shopping_list = create_shopping_list(
+            user=self.user, title="sample title", description=original_description
+        )
+
+        payload = {"title": "New list title"}
+        url = detail_url(shopping_list.id)
+        res = self.client.patch(url, payload)
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        shopping_list.refresh_from_db()
+        self.assertEqual(shopping_list.title, payload["title"])
+        self.assertEqual(shopping_list.description, original_description)
+        self.assertEqual(shopping_list.user, self.user)
+
+    def test_full_update(self):
+        """Test full update of shopping list."""
+        shopping = create_shopping_list(
+            user=self.user, title="Sample title", description="Sample description"
+        )
+        other_user = create_user(email="another@example.com", password="pass123")
+
+        payload = {
+            "title": "New shopping list",
+            "description": "New sample description",
+            "additional_users": [other_user.id],
+        }
+        url = detail_url(shopping.id)
+        res = self.client.put(url, payload)
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        shopping.refresh_from_db()
+        for k, v in payload.items():
+            if k != "additional_users":
+                self.assertEqual(getattr(shopping, k), v)
+
+        self.assertEqual(len(shopping.additional_users.all()), 1)
+        self.assertEqual(shopping.user, self.user)
+
+    def test_update_user_returns_error(self):
+        """Test chaning the shopping list user results in an error."""
+        new_user = create_user(email="user2@example.com", password="test123")
+        shopping_list = create_shopping_list(user=self.user)
+
+        payload = {"user": new_user.id}
+        url = detail_url(shopping_list.id)
+        self.client.patch(url, payload)
+
+        shopping_list.refresh_from_db()
+        self.assertEqual(shopping_list.user, self.user)
+
+    def test_delete_shopping_list(self):
+        """Test delete shopping list is successful."""
+        shopping_list = create_shopping_list(user=self.user)
+
+        url = detail_url(shopping_list.id)
+        res = self.client.delete(url)
+
+        self.assertEqual(res.status_code, status.HTTP_204_NO_CONTENT)
+
+    def test_shopping_list_other_users_error(self):
+        new_user = create_user(email="user2@example.com", password="testpassword")
+        shopping_list = create_shopping_list(user=new_user)
+
+        url = detail_url(shopping_list.id)
+        res = self.client.delete(url)
+
+        self.assertEqual(res.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertTrue(ShoppingList.objects.filter(id=shopping_list.id).exists())
