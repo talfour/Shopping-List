@@ -41,7 +41,7 @@ INSTALLED_APPS = [
     "core",
     "rest_framework",
     "user",
-    "shoppingList",
+    "shopping_list",
     "rest_framework_simplejwt",
     "drf_spectacular",
 ]
