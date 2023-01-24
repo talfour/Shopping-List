@@ -105,9 +105,9 @@ class PublicUserApiTests(TestCase):
 
         payload = {"email": user_details["email"], "password": user_details["password"]}
         token = self.client.post(TOKEN_URL, payload)
-        refresh = token.data['refresh']
+        refresh = token.data["refresh"]
 
-        res = self.client.post(reverse("user:token-refresh"), {'refresh':refresh})
+        res = self.client.post(reverse("user:token-refresh"), {"refresh": refresh})
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertIn("access", res.data)
 
@@ -123,10 +123,33 @@ class PrivateUserApiTests(TestCase):
 
     def setUp(self):
         self.user = create_user(
-            email='test@example.com',
-            password='testpass123',
+            email="test@example.com",
+            password="testpass123",
             name="Test Name",
         )
         self.client = APIClient()
         self.client.force_authenticate(user=self.user)
-        
+
+    def test_retrive_profile_success(self):
+        """Test retrieving profile for logged in user."""
+        res = self.client.get(ME_URL)
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(res.data, {"name": self.user.name, "email": self.user.email})
+
+    def test_post_me_not_allowed(self):
+        """Test POST is not allowed for the me endpoint."""
+        res = self.client.post(ME_URL, {})
+
+        self.assertEqual(res.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
+
+    def test_update_user_profile(self):
+        """Test updating the user profile for the authenticated user."""
+        payload = {"name": "Updated name", "password": "newpass123"}
+
+        res = self.client.patch(ME_URL, payload)
+
+        self.user.refresh_from_db()
+        self.assertEqual(self.user.name, payload["name"])
+        self.assertTrue(self.user.check_password(payload["password"]))
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
