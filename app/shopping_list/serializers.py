@@ -3,7 +3,16 @@ Serializers for shopping list API
 """
 from rest_framework import serializers
 
-from core.models import ShoppingList
+from core.models import ShoppingList, Item
+
+
+class ItemSerializer(serializers.ModelSerializer):
+    """Serializer for items."""
+
+    class Meta:
+        model = Item
+        fields = ["id", "name", "food_type"]
+        read_only_fields = ["id"]
 
 
 class ShoppingListSerializer(serializers.ModelSerializer):
