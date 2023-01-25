@@ -39,8 +39,11 @@ class ShoppingListViewSet(viewsets.ModelViewSet):
         serializer.save(user=self.request.user)
 
 
-class ItemViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
+class ItemViewSet(
+    mixins.UpdateModelMixin, mixins.ListModelMixin, viewsets.GenericViewSet
+):
     """Manage items in the database."""
+
     serializer_class = serializers.ItemSerializer
     queryset = Item.objects.all()
     authentication_classes = [JWTAuthentication]
@@ -48,5 +51,4 @@ class ItemViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
 
     def get_queryset(self):
         """Filter queryset to authenticated user."""
-        return self.queryset.filter(user=self.request.user).order_by('-name')
-    
+        return self.queryset.filter(user=self.request.user).order_by("-name")
