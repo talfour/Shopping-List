@@ -200,18 +200,20 @@ class PrivateRecipeApiTests(TestCase):
         shopping_list = shopping_lists[0]
         self.assertEqual(shopping_list.items.count(), 2)
         for item in payload["items"]:
-            exists = shopping_list.filter(name=item["name"], user=self.user).exists()
+            exists = shopping_list.items.filter(
+                name=item["name"], user=self.user
+            ).exists()
             self.assertTrue(exists)
 
     def test_create_shopping_list_with_existing_item(self):
         """Test creating shopping list with existing item."""
-        item = Item.objects.create(user=self.user, name='Lemon', food_type='fruits')
+        item = Item.objects.create(user=self.user, name="Lemon", food_type="fruits")
         payload = {
-            'title': 'My shopping list',
-            'description': 'Veggies to buy',
-            'ingredients': [{'name': 'Lemon'}, {'name': 'Oregano'}]
+            "title": "My shopping list",
+            "description": "Veggies to buy",
+            "items": [{"name": "Lemon"}, {"name": "Oregano"}],
         }
-        res = self.client.post(SHOPPING_LIST_URL, payload, format='json')
+        res = self.client.post(SHOPPING_LIST_URL, payload, format="json")
 
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
         shopping_lists = ShoppingList.objects.filter(user=self.user)
@@ -219,6 +221,48 @@ class PrivateRecipeApiTests(TestCase):
         shopping_list = shopping_lists[0]
         self.assertEqual(shopping_list.items.count(), 2)
         self.assertIn(item, shopping_list.items.all())
-        for item in payload['items']:
-            exists = shopping_list.filter(name=item['name'], user=self.user).exists()
+        for item in payload["items"]:
+            exists = shopping_list.items.filter(
+                name=item["name"], user=self.user
+            ).exists()
             self.assertTrue(exists)
+
+    def test_create_item_on_update(self):
+        """Test creating an item when updating a shopping list"""
+        shopping_list = create_shopping_list(user=self.user)
+
+        payload = {"items": [{"name": "Sugar"}]}
+        url = detail_url(shopping_list.id)
+        res = self.client.patch(url, payload, format="json")
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        new_item = Item.objects.get(user=self.user, name="Sugar")
+        self.assertIn(new_item, shopping_list.items.all())
+
+    def test_update_shopping_list_assign_item(self):
+        """Test assigning an existing item when updating a shopping list."""
+        item1 = Item.objects.create(user=self.user, name="Pepper")
+        shopping_list = create_shopping_list(user=self.user)
+        shopping_list.items.add(item1)
+
+        item2 = Item.objects.create(user=self.user, name="Chili")
+        payload = {"items": [{"name": "Chili"}]}
+        url = detail_url(shopping_list.id)
+        res = self.client.patch(url, payload, format="json")
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertIn(item2, shopping_list.items.all())
+        self.assertNotIn(item1, shopping_list.items.all())
+
+    def test_clear_shopping_list_items(self):
+        """Test clearing a shopping list items."""
+        item = Item.objects.create(user=self.user, name="Thyme")
+        shopping_list = create_shopping_list(user=self.user)
+        shopping_list.items.add(item)
+
+        payload = {"ingredients": []}
+        url = detail_url(shopping_list.id)
+        res = self.client.patch(url, payload, format="json")
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(shopping_list.items.count(), 0)
