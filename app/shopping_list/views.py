@@ -40,7 +40,10 @@ class ShoppingListViewSet(viewsets.ModelViewSet):
 
 
 class ItemViewSet(
-    mixins.UpdateModelMixin, mixins.ListModelMixin, viewsets.GenericViewSet
+    mixins.DestroyModelMixin,
+    mixins.UpdateModelMixin,
+    mixins.ListModelMixin,
+    viewsets.GenericViewSet,
 ):
     """Manage items in the database."""
 
