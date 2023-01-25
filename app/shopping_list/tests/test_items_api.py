@@ -91,6 +91,16 @@ class PrivateItemApiTest(TestCase):
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         item.refresh_from_db()
-        self.assertEqual(item.name, payload['name'])
+        self.assertEqual(item.name, payload["name"])
         self.assertEqual(item.food_type, payload["food_type"])
         self.assertEqual(item.last_time_used.date(), payload["last_time_used"].date())
+
+    def test_delete_item(self):
+        """Test removing an item."""
+        item = Item.objects.create(user=self.user, name="delete me")
+        url = detail_url(item.id)
+        res = self.client.delete(url)
+
+        self.assertEqual(res.status_code, status.HTTP_204_NO_CONTENT)
+        items = Item.objects.filter(user=self.user)
+        self.assertFalse(items.exists())
