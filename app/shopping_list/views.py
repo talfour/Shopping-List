@@ -4,11 +4,12 @@ Views for shopping list APIs.
 from django.db.models import Q
 
 from rest_framework import viewsets
+from rest_framework import mixins
 from rest_framework.permissions import IsAuthenticated
 
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
-from core.models import ShoppingList
+from core.models import ShoppingList, Item
 from shopping_list import serializers
 
 
@@ -36,3 +37,16 @@ class ShoppingListViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         """Create a new shopping list"""
         serializer.save(user=self.request.user)
+
+
+class ItemViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
+    """Manage items in the database."""
+    serializer_class = serializers.ItemSerializer
+    queryset = Item.objects.all()
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        """Filter queryset to authenticated user."""
+        return self.queryset.filter(user=self.request.user).order_by('-name')
+    
