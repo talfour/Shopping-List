@@ -61,10 +61,24 @@ class ShoppingList(models.Model):
         return self.title
 
 
+FOOD_TYPE = (
+    ("vegetables", "vegetables"),
+    ("fruits", "fruits"),
+    ("grains, beans and nuts", "grains, beans and nuts"),
+    ("meat and poultry", "meat and poultry"),
+    ("fish and seafood", "fish and seafood"),
+    ("dairy foods", "dairy foods"),
+    ("fat", "fat"),
+    ("sweets", "sweets"),
+    ("spices", "spices"),
+)
+
+
 class Item(models.Model):
     name = models.CharField(max_length=255)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    last_time_used = models.DateTimeField(default=timezone.now())
+    last_time_used = models.DateTimeField(default=timezone.now)
+    food_type = models.CharField(choices=FOOD_TYPE, blank=True, max_length=100)
 
     def __str__(self):
         return self.name
