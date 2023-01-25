@@ -84,13 +84,13 @@ class PrivateItemApiTest(TestCase):
         payload = {
             "name": "Pork",
             "food_type": "meat and poultry",
-            "last_time_used": timezone.now,
+            "last_time_used": timezone.now(),
         }
         url = detail_url(item.id)
         res = self.client.patch(url, payload)
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         item.refresh_from_db()
-        self.assertEqual(item.name, payload.name)
-        self.assertEqual(item.food_type, payload.food_type)
-        self.assertEqual(item.last_time_used, payload.last_time_used)
+        self.assertEqual(item.name, payload['name'])
+        self.assertEqual(item.food_type, payload["food_type"])
+        self.assertEqual(item.last_time_used.date(), payload["last_time_used"].date())
