@@ -9,7 +9,7 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APIClient
 
-from core.models import ShoppingList
+from core.models import ShoppingList, Item
 
 from shopping_list.serializers import (
     ShoppingListSerializer,
@@ -181,3 +181,44 @@ class PrivateRecipeApiTests(TestCase):
 
         self.assertEqual(res.status_code, status.HTTP_404_NOT_FOUND)
         self.assertTrue(ShoppingList.objects.filter(id=shopping_list.id).exists())
+
+    def test_create_shopping_list_with_new_items(self):
+        """Test creating a shopping list with new items."""
+        payload = {
+            "title": "My new shopping list",
+            "description": "Food to buy",
+            "items": [
+                {"name": "Cauliflower", "food_type": "vegetables"},
+                {"name": "Salt", "food_type": "spices"},
+            ],
+        }
+        res = self.client.post(SHOPPING_LIST_URL, payload, format="json")
+
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+        shopping_lists = ShoppingList.objects.filter(user=self.user)
+        self.assertEqual(shopping_lists.count(), 1)
+        shopping_list = shopping_lists[0]
+        self.assertEqual(shopping_list.items.count(), 2)
+        for item in payload["items"]:
+            exists = shopping_list.filter(name=item["name"], user=self.user).exists()
+            self.assertTrue(exists)
+
+    def test_create_shopping_list_with_existing_item(self):
+        """Test creating shopping list with existing item."""
+        item = Item.objects.create(user=self.user, name='Lemon', food_type='fruits')
+        payload = {
+            'title': 'My shopping list',
+            'description': 'Veggies to buy',
+            'ingredients': [{'name': 'Lemon'}, {'name': 'Oregano'}]
+        }
+        res = self.client.post(SHOPPING_LIST_URL, payload, format='json')
+
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+        shopping_lists = ShoppingList.objects.filter(user=self.user)
+        self.assertEqual(shopping_lists.count(), 1)
+        shopping_list = shopping_lists[0]
+        self.assertEqual(shopping_list.items.count(), 2)
+        self.assertIn(item, shopping_list.items.all())
+        for item in payload['items']:
+            exists = shopping_list.filter(name=item['name'], user=self.user).exists()
+            self.assertTrue(exists)
