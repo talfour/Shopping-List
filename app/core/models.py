@@ -8,6 +8,7 @@ from django.contrib.auth.models import (
     BaseUserManager,
     PermissionsMixin,
 )
+from django.utils import timezone
 
 
 class UserManager(BaseUserManager):
@@ -54,6 +55,16 @@ class ShoppingList(models.Model):
     additional_users = models.ManyToManyField(
         settings.AUTH_USER_MODEL, related_name="additional_users", blank=True
     )
+    items = models.ManyToManyField("Item")
 
     def __str__(self):
         return self.title
+
+
+class Item(models.Model):
+    name = models.CharField(max_length=255)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    last_time_used = models.DateTimeField(default=timezone.now())
+
+    def __str__(self):
+        return self.name
