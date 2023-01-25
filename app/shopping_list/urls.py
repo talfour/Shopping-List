@@ -10,6 +10,7 @@ from shopping_list import views
 
 router = DefaultRouter()
 router.register("shopping_lists", views.ShoppingListViewSet, basename="shopping_list")
+router.register('items', views.ItemViewSet)
 
 app_name = "shopping_list"
 
