@@ -9,7 +9,7 @@ env
 .env
 config
 build
-node_modules
+node_modules/
 docker-compose.yaml
 DockerfileFront
 README.md
