@@ -1,26 +1,24 @@
 import React, { useState } from "react";
 
-import Nav from "../components/Nav";
-import Home from "../pages/Home";
-import Login from "../components/Login";
+import Nav from "./components/Nav";
+import Home from "./pages/Home";
+import Login from "./components/Login";
 import { Routes, Route } from "react-router-dom";
-import PrivateRoute from "../utils/PrivateRoute";
-
-//tutaj dodać auth
-
-
+import PrivateRoute from "./utils/PrivateRoute";
+import GlobalStyle from "./components/GlobalStyle";
 
 function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState(true)
+  const [isAuthenticated, setIsAuthenticated] = useState(true);
   return (
     <div className="App">
+      <GlobalStyle />
       <Nav />
       <Routes>
         <Route
           exact
           path="/"
           element={
-            <PrivateRoute auth={{isAuthenticated}}>
+            <PrivateRoute auth={{ isAuthenticated }}>
               <Home />
             </PrivateRoute>
           }
