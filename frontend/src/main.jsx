@@ -1,24 +1,16 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App";
-// import './index.css'
-import { ChakraProvider } from "@chakra-ui/react";
-import { extendTheme } from "@chakra-ui/react";
-
-const theme = extendTheme({
-  styles: {
-    global: () => ({
-      body: {
-        bg: "dark",
-      },
-    }),
-  },
-});
+import { BrowserRouter } from "react-router-dom";
+import { AuthProvider } from "../context/AuthContext";
+// import "../interceptor/axiox.js";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
-    <ChakraProvider>
-      <App />
-    </ChakraProvider>
+    <BrowserRouter>
+      <AuthProvider>
+        <App />
+      </AuthProvider>
+    </BrowserRouter>
   </React.StrictMode>
 );
