@@ -8,7 +8,6 @@ import PrivateRoute from "./utils/PrivateRoute";
 import GlobalStyle from "./components/GlobalStyle";
 
 function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState(true);
   return (
     <div className="App">
       <GlobalStyle />
@@ -18,7 +17,7 @@ function App() {
           exact
           path="/"
           element={
-            <PrivateRoute auth={{ isAuthenticated }}>
+            <PrivateRoute>
               <Home />
             </PrivateRoute>
           }
