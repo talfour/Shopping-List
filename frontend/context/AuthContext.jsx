@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  let history = useNavigate();
+  const history = useNavigate();
 
   const [authTokens, setAuthTokens] = useState(() =>
     localStorage.getItem("authTokens")
@@ -44,32 +44,6 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const updateToken = async () => {
-    const response = await fetch(
-      "http://127.0.0.1:8000/api/user/token/refresh",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          refresh: authTokens?.refresh,
-        }),
-      }
-    );
-    if (response.status === 200) {
-      const data = await response.json();
-      setAuthTokens(data);
-      setUser(jwt_decode(data.access));
-      localStorage.setItem("authTokens", JSON.stringify(data));
-    } else {
-      logoutUser();
-    }
-    if (loading) {
-      setLoading(false);
-    }
-  };
-
   const logoutUser = () => {
     setAuthTokens(null);
     setUser(null);
@@ -77,26 +51,21 @@ export const AuthProvider = ({ children }) => {
     history("/login");
   };
 
-  useEffect(() => {
-    if (loading) {
-      updateToken();
-    }
-    const fourMinutes = 1000 * 60 * 4;
-    const interval = setInterval(() => {
-      if (authTokens) {
-        updateToken();
-      }
-    }, fourMinutes);
-    return () => clearInterval(interval);
-  }, [authTokens, loading]);
-
   //add data here if need to use anywhere else
-  let contextData = {
+  const contextData = {
     user: user,
     loginUser: loginUser,
     logoutUser: logoutUser,
     authTokens: authTokens,
+    setAuthTokens: setAuthTokens,
+    setUser: setUser,
   };
+  useEffect(() => {
+    if (authTokens) {
+      setUser(jwt_decode(authTokens.access));
+    }
+    setLoading(false);
+  }, [authTokens, loading]);
 
   return (
     <AuthContext.Provider value={contextData}>

@@ -1,43 +1,33 @@
 import { useEffect, useState, useContext } from "react";
 import AuthContext from "../context/AuthContext";
+import useFetch from "../utils/useFetch";
 
 const Home = () => {
-  const { user, authTokens, logoutUser } = useContext(AuthContext);
-  const [items, setItems] = useState([]);
+  const [shoppingLists, setShoppingLists] = useState([]);
+  const { authTokens, logoutUser } = useContext(AuthContext);
+
+  const api = useFetch();
 
   useEffect(() => {
-    getItems();
+    getShoppingLists();
   }, []);
 
-  const getItems = async () => {
-    console.log(`Bearer ${authTokens.access}`);
-    const response = await fetch(
-      "http://127.0.0.1:8000/api/shopping_list/shopping_lists/",
-      {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${authTokens.access}`,
-        },
-      }
-    );
-    const data = await response.json();
+  const getShoppingLists = async () => {
+    const { response, data } = await api("/api/shopping_list/shopping_lists/");
     if (response.status === 200) {
-      setItems(data);
-    } else if (response.statusText === "Unauthorized") {
-      logoutUser();
+      setShoppingLists(data);
     }
   };
 
   return (
     <div>
-      <div> {user && <p>Hi {user.name}</p>}</div>
-      <div>
-        <h1>Your shopping lists</h1>
-        {items.map((item) => (
-          <p key={item.id}>{item.title}</p>
+      <p>You are logged to the home page!</p>
+
+      <ul>
+        {shoppingLists.map((shoppingList) => (
+          <li key={shoppingList.id}>{shoppingList.title}</li>
         ))}
-      </div>
+      </ul>
     </div>
   );
 };
