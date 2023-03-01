@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 
 from pathlib import Path
 from os import environ
+from datetime import timedelta
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -26,7 +27,7 @@ SECRET_KEY = "django-insecure-a$oeq7l^iz46m669e8=*fcy-6)66^9u5)!8qi+_id701079zro
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"]
 
 
 # Application definition
@@ -44,7 +45,8 @@ INSTALLED_APPS = [
     "shopping_list",
     "rest_framework_simplejwt",
     "drf_spectacular",
-    'corsheaders'
+    "corsheaders",
+    "rest_framework_simplejwt.token_blacklist"
 ]
 
 MIDDLEWARE = [
@@ -145,6 +147,13 @@ REST_FRAMEWORK = {
 AUTH_USER_MODEL = "core.User"
 
 
-CORS_ORIGIN_WHITELIST = [
-    'http://localhost:3000'
+CORS_ORIGIN_WHITELIST = ["http://localhost:3000"]
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",
 ]
+
+SIMPLE_JWT = {
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=30),
+    "ROTATE_REFRESH_TOKENS": True,
+    "BLACKLIST_AFTER_ROTATION": True,
+}
