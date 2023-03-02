@@ -6,7 +6,7 @@ import AuthContext from "../context/AuthContext";
 const useFetch = () => {
   const config = {};
 
-  const { authTokens, setAuthTokens, setUser } = useContext(AuthContext);
+  let { authTokens, setAuthTokens, setUser } = useContext(AuthContext);
 
   const baseURL = "http://127.0.0.1:8000";
 
