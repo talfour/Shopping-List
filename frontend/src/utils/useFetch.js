@@ -35,15 +35,20 @@ const useFetch = () => {
     return data;
   };
 
-  const callFetch = async (url) => {
+  const callFetch = async (url, method, body) => {
     const user = jwt_decode(authTokens.access);
     const isExpired = dayjs.unix(user.exp).diff(dayjs()) < 1;
 
     if (isExpired) {
       authTokens = await refreshToken(authTokens);
     }
+    config["method"] = method;
+    if (body !== "") {
+      config["body"] = JSON.stringify(body);
+    }
 
     config["headers"] = {
+      "Content-Type": "application/json",
       Authorization: `Bearer ${authTokens?.access}`,
     };
 
