@@ -4,6 +4,10 @@ Serializers for the user API View.
 from django.contrib.auth import get_user_model
 
 from rest_framework import serializers
+from rest_framework_simplejwt import (
+    serializers as jwt_serializers,
+    exceptions as jwt_exceptions,
+)
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -28,3 +32,21 @@ class UserSerializer(serializers.ModelSerializer):
             user.save()
 
         return user
+
+
+class CookieTokenRefreshSerializer(jwt_serializers.TokenRefreshSerializer):
+    refresh = None
+
+    def validate(self, attrs):
+        attrs["refresh"] = self.context["request"].COOKIES.get("refresh")
+        if attrs["refresh"]:
+            return super().validate(attrs)
+        else:
+            raise jwt_exceptions.InvalidToken(
+                "No valid token found in cookie 'refresh'"
+            )
+
+
+class LoginSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    password = serializers.CharField(style={"input_type": "password"}, write_only=True)
