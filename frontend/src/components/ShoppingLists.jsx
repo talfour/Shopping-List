@@ -1,14 +1,13 @@
 import React, { useState } from "react";
 import styled from "styled-components";
 import { motion } from "framer-motion";
-import useFetch from "../utils/useFetch";
+import useAxiosPrivate from "../hooks/useAxiosPrivate";
 
 const ShoppingLists = ({ lists, setLists, activeList, setActiveList }) => {
+  const axiosPrivateInstance = useAxiosPrivate();
   const [isNewVisible, setIsNewVisible] = useState();
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-
-  const api = useFetch();
 
   const shoppingListHandler = (e) => {
     const listID = e.target.dataset.tag;
@@ -18,19 +17,17 @@ const ShoppingLists = ({ lists, setLists, activeList, setActiveList }) => {
 
   const addNewListHandler = async (e) => {
     e.preventDefault();
-    const { response, data } = await api(
-      "/api/shopping_list/shopping_lists/",
-      "POST",
-      {
-        title: title,
-        description: description,
-      }
+    const response = await axiosPrivateInstance.post(
+      "shopping_list/shopping_lists/",
+      { title: title, description: description }
     );
 
-    if (response.status === 201) {
-      setLists((prevState) => [data, ...prevState]);
-      setActiveList(data);
+    if (response?.status === 201) {
+      setLists((prevState) => [response.data, ...prevState]);
+      setActiveList(response.data);
       setIsNewVisible(false);
+      setTitle("");
+      setDescription("");
     }
   };
 
@@ -119,7 +116,7 @@ const StyledListItem = styled.div`
   cursor: pointer;
   transition: all 0.5s ease;
   background-color: #f4f4f4;
-  border-bottom: rgba(0,0,0,0.5) 1px solid;
+  border-bottom: rgba(0, 0, 0, 0.5) 1px solid;
   span {
     background-color: #bf616a;
     border-radius: 2px;

@@ -1,30 +1,33 @@
 import { useEffect, useState, useContext } from "react";
-import AuthContext from "../context/AuthContext";
-import useFetch from "../utils/useFetch";
+import useAxiosPrivate from "../hooks/useAxiosPrivate";
 import styled from "styled-components";
 import { motion } from "framer-motion";
-
+import useAuth from "../hooks/useAuth";
 import ShoppingLists from "../components/ShoppingLists";
 import ShoppingItems from "../components/ShoppingItems";
 
 const Home = () => {
+  const { user, setUser } = useAuth();
   const [lists, setLists] = useState([]);
-  const { authTokens, logoutUser } = useContext(AuthContext);
+  const axiosPrivateInstance = useAxiosPrivate();
   const [activeList, setActiveList] = useState();
 
-  const api = useFetch();
-
   useEffect(() => {
+    async function getShoppingLists() {
+      try {
+        const response = await axiosPrivateInstance.get(
+          "shopping_list/shopping_lists/"
+        );
+        if (response?.status === 200) {
+          setLists(response.data);
+          setActiveList(response.data[0]);
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    }
     getShoppingLists();
   }, []);
-
-  const getShoppingLists = async () => {
-    const { response, data } = await api("/api/shopping_list/shopping_lists/");
-    if (response.status === 200) {
-      setLists(data);
-      setActiveList(data[0]);
-    }
-  };
 
   return (
     <StyledMain>

@@ -1,24 +1,21 @@
 import React from "react";
 import styled from "styled-components";
 import { motion } from "framer-motion";
-import useFetch from "../utils/useFetch";
+import useAxiosPrivate from "../hooks/useAxiosPrivate";
+
 const ShoppingItems = ({ activeList, setActiveList, setLists, lists }) => {
-  const api = useFetch();
-
+  const axiosPrivateInstance = useAxiosPrivate();
   const removeListHandler = async () => {
-    const { response } = await api(
-      `/api/shopping_list/shopping_lists/${activeList.id}`,
-      "DELETE", ""
+    const response = await axiosPrivateInstance.delete(
+      `/shopping_list/shopping_lists/${activeList.id}`
     );
-    console.log(response);
-    // if (response.status === 404) {
-    //       console.log(response.status);
-    //       // setLists((prevData) =>
-    //       //   prevData.filter((data) => data.id != activeList.id)
-    //       // );
-    // }
-
-    // setActiveList(lists[0])
+    if (response.status === 204) {
+      const filteredList = lists.filter((e) => {
+        return e.id !== activeList.id;
+      });
+      setLists(filteredList);
+      setActiveList(filteredList[0]);
+    }
   };
 
   return (
