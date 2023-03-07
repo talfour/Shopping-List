@@ -1,19 +1,20 @@
-import { useState, useEffect, useContext } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
-import AuthContext from "../context/AuthContext";
-
+import useAuth from "../hooks/useAuth";
 import styled from "styled-components";
 import { motion } from "framer-motion";
+import useLogout from "../hooks/useLogout";
 
 const Nav = () => {
-  const [isAuth, setIsAuth] = useState(false);
-  let { user, logoutUser } = useContext(AuthContext);
+  const { user } = useAuth();
+  const logout = useLogout();
+  const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    if (localStorage.getItem("access_token") !== null) {
-      setIsAuth(true);
-    }
-  }, []);
+  const handleLogout = async () => {
+    setLoading(true);
+    await logout();
+    navigate("/auth/login");
+  };
 
   return (
     <NavStyled>
@@ -21,9 +22,17 @@ const Nav = () => {
         <h1>Shopping List</h1>
       </Link>
       {user ? (
-        <button onClick={logoutUser}>Logout</button>
+        <div>
+          <Link to="auth/user">{user?.name}</Link>
+          <button disabled={loading} type="button" onClick={handleLogout}>
+            Logout
+          </button>
+        </div>
       ) : (
-        <Link to="/login">Login</Link>
+        <div>
+          <Link to="/auth/login">Login</Link>
+          <Link to="/auth/register">Register</Link>
+        </div>
       )}
     </NavStyled>
   );
@@ -37,8 +46,30 @@ const NavStyled = styled(motion.nav)`
   background: #37474f;
   color: white;
   box-shadow: 0px 10px 5px 0px rgba(0, 0, 0, 0.75);
+  
   a {
-    color: white;
+    color: #bdbdbd;
+    transition: all 0.7s ease;
+    font-weight: bold;
+    :hover {
+      color: white;
+    }
+  }
+  div {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    button {
+      padding: 0 2rem;
+      color: #bdbdbd;
+      font-size: 1.1rem;
+      cursor: pointer;
+      border: 0;
+      :hover {
+        background: none;
+        color: white;
+      }
+    }
   }
 `;
 
