@@ -337,11 +337,6 @@ const StyledRegistration = styled.section`
     margin-right: 0.25rem;
   }
 
-  .offscreen {
-    position: absolute;
-    left: -9999px;
-  }
-
   .hide {
     display: none;
   }
@@ -354,14 +349,6 @@ const StyledRegistration = styled.section`
   .invalid {
     color: red;
     margin-left: 0.25rem;
-  }
-
-  .errmsg {
-    background-color: lightpink;
-    color: firebrick;
-    font-weight: bold;
-    padding: 0.5rem;
-    margin-bottom: 0.5rem;
   }
 
   .line {

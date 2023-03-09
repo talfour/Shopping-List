@@ -62,8 +62,26 @@ h2{
     width: 0;
     opacity: 0;
 }
+  .offscreen {
+    position: absolute;
+    left: -9999px;
+  }
+  .errmsg {
+    background-color: lightpink;
+    color: firebrick;
+    font-weight: bold;
+    padding: 0.5rem;
+    margin-bottom: 0.5rem;
+    text-align: center;
+  }
+  .successmsg {
+    background-color: limegreen;
+    color: #004500;
+    font-weight: bold;
+    padding: 0.5rem;
+    margin-bottom: 0.5rem;
+    text-align: center;
+  }
 `;
-
-
 
 export default GlobalStyle;
