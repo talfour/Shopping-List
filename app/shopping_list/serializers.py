@@ -15,18 +15,18 @@ class ItemSerializer(serializers.ModelSerializer):
         read_only_fields = ["id"]
 
 
-class UserSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = ["id", "email"]
-        lookup_fields = "email"
 
 
 class ShoppingListSerializer(serializers.ModelSerializer):
     """Serializer for shopping lists."""
 
     items = ItemSerializer(many=True, required=False)
-    additional_users = UserSerializer(many=True, required=False)
+    additional_users = serializers.SlugRelatedField(
+        many=True,
+        queryset=User.objects.all(),
+        slug_field = 'email',
+        required=False
+    )
 
     class Meta:
         model = ShoppingList
@@ -67,22 +67,13 @@ class ShoppingListSerializer(serializers.ModelSerializer):
             instance.items.clear()
             self._get_or_create_items(items, instance)
         if additional_users is not None:
-            additional_users_data = []
-            for additional_user in additional_users:
-                email = additional_users.pop("email", None)
-                if email is not None:
-                    try:
-                        obj = User.objects.get(email=email)
-                        obj.__dict__.update(**additional_user)
-                        obj.save()
-                        additional_users_data.append(obj)
-                    except User.DoesNotExist:
-                        pass
-            instance.additional_users.set(additional_users_data)
-            # users_object = User.objects.get(email=additional_users["email"])
-
-            # instance.additional_users.clear()
-            # self._get_additional_user(additional_users, instance)
+            # if not found?
+            # if user=selfuser?
+            # if self.request.user in additional_users:
+                # print("is in")
+            print(additional_users)
+            instance.additional_users.clear()
+            self._get_additional_user(additional_users, instance)
 
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
