@@ -7,6 +7,6 @@ export default function AuthMiddleware() {
   return accessToken ? (
     <Outlet />
   ) : (
-    <Navigate to="/auth/login" state={{ from: location }} replace />
+    <Navigate to="/auth/register" state={{ from: location }} replace />
   );
 }
