@@ -1,9 +1,13 @@
-import React from "react";
+import { useState } from "react";
 import styled from "styled-components";
 import { motion } from "framer-motion";
 import useAxiosPrivate from "../hooks/useAxiosPrivate";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faUserPlus } from "@fortawesome/free-solid-svg-icons";
 
 const ShoppingItems = ({ activeList, setActiveList, setLists, lists }) => {
+  const [newUser, setNewUser] = useState("");
+
   const axiosPrivateInstance = useAxiosPrivate();
   const removeListHandler = async () => {
     const response = await axiosPrivateInstance.delete(
@@ -18,11 +22,32 @@ const ShoppingItems = ({ activeList, setActiveList, setLists, lists }) => {
     }
   };
 
+  const addNewUserHandler = async () => {
+    // on click show new window from side like on adding shopping list
+    // "additional_users": [other_user.id],
+    const response = await axiosPrivateInstance.patch(
+      `/shopping_list/shopping_lists/${activeList.id}/`,
+      {
+        additional_users: [{ email: "test1@example.com" }],
+      }
+    );
+    if (response.status === 200) {
+      // show success message
+    } else {
+      // show unsuccessfull message
+    }
+  };
+
   return (
     <StyledShoppingWrapper>
       <div className="top-section">
         <h2>{activeList && activeList.title}</h2>
         <span onClick={removeListHandler}>Delete list</span>
+        <FontAwesomeIcon
+          className="add-user"
+          icon={faUserPlus}
+          onClick={addNewUserHandler}
+        />
       </div>
 
       <StyledShoppingItems>
@@ -52,6 +77,14 @@ const StyledShoppingWrapper = styled.div`
       padding: 1rem 1rem;
       border-radius: 5px;
       cursor: pointer;
+    }
+    .add-user {
+      cursor: pointer;
+      transition: all 0.7s ease;
+      :hover {
+        color: limegreen;
+        scale: 120%;
+      }
     }
   }
 `;
