@@ -64,10 +64,10 @@ class ShoppingListSerializer(serializers.ModelSerializer):
         items = validated_data.pop("items", [])
         additional_users = validated_data.pop("additional_users", [])
         if items is not None:
-            # instance.items.clear()
+            instance.items.clear()
             self._get_or_create_items(items, instance)
         if additional_users is not None:
-            # instance.additional_users.clear()
+            instance.additional_users.clear()
             self._get_additional_user(additional_users, instance)
 
         for attr, value in validated_data.items():
