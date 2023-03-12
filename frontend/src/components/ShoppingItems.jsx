@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import styled from "styled-components";
 import { motion } from "framer-motion";
 import useAxiosPrivate from "../hooks/useAxiosPrivate";
@@ -7,6 +7,7 @@ import { faUserPlus, faX } from "@fortawesome/free-solid-svg-icons";
 
 const ShoppingItems = ({ activeList, setActiveList, setLists, lists }) => {
   const [addUserDialog, setAddUserDialog] = useState(false);
+  const [previousUsedItems, setPreviousUsedItems] = useState();
   const [newUser, setNewUser] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
   const [errMsg, setErrMsg] = useState("");
@@ -88,6 +89,91 @@ const ShoppingItems = ({ activeList, setActiveList, setLists, lists }) => {
     }
   };
 
+  const addItemToListHandler = async (e) => {
+    try {
+      const prevItems = activeList?.items;
+      const newItem = {
+        id: e.target.dataset.id,
+        name: e.target.dataset.name,
+        food_type: e.target.dataset.type,
+      };
+      const newItemsArray = [...prevItems, newItem].sort((a, b) => {
+        if (a.food_type > b.food_type) {
+          return -1;
+        }
+        if (a.food_type < b.food_type) {
+          return 1;
+        }
+        return 0;
+      });
+      const response = await axiosPrivateInstance.patch(
+        `/shopping_list/shopping_lists/${activeList.id}/`,
+        {
+          items: newItemsArray,
+        }
+      );
+      setActiveList((prevActiveList) => ({
+        ...prevActiveList,
+        items: newItemsArray,
+      }));
+
+      const newPreviousUsedItems = previousUsedItems.filter(
+        (item) => item.id !== parseInt(newItem.id)
+      );
+      setPreviousUsedItems(newPreviousUsedItems);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const removeItemFromListHandler = async (e) => {
+    const itemToRemove = e.target.dataset.id;
+    const prevItems = [...activeList?.items];
+    const newItemsArray = prevItems.filter(
+      (item) => parseInt(item.id) !== parseInt(itemToRemove)
+    );
+    try {
+      const response = await axiosPrivateInstance.patch(
+        `/shopping_list/shopping_lists/${activeList.id}/`,
+        {
+          items: newItemsArray,
+        }
+      );
+      setActiveList((prevActiveList) => ({
+        ...prevActiveList,
+        items: newItemsArray,
+      }));
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const listLastUsedItemsHandler = async (e) => {
+    try {
+      const response = await axiosPrivateInstance.get("/shopping_list/items/");
+      const lastUsedItems = response.data;
+      const filteredUsedItems = lastUsedItems.filter(
+        (item) =>
+          !activeList?.items?.some((item2) => item.id === parseInt(item2.id))
+      );
+      setPreviousUsedItems(filteredUsedItems);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    listLastUsedItemsHandler();
+  }, [activeList]);
+
+  const searchItemHandler = async (e) => {
+    try {
+      const response = await axiosPrivateInstance.get();
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   return (
     <StyledShoppingWrapper>
       <StyledNewList
@@ -139,17 +225,60 @@ const ShoppingItems = ({ activeList, setActiveList, setLists, lists }) => {
           onClick={addNewListDialogHandler}
         />
       </div>
-
-      <StyledShoppingItems>
+      <StyledMainShopping>
         <input placeholder="What would you like to buy?" type="text"></input>
-        {activeList &&
-          activeList.items.map((item) => (
-            <StyledItem key={item.id}>{item.name}</StyledItem>
-          ))}
-      </StyledShoppingItems>
+
+        <StyledShoppingItems>
+          {activeList &&
+            activeList.items.map((item) => (
+              <StyledItem
+                onClick={removeItemFromListHandler}
+                data-id={item.id}
+                data-name={item.name}
+                data-type={item?.food_type}
+                key={item.id}
+              >
+                {item.name}
+              </StyledItem>
+            ))}
+        </StyledShoppingItems>
+        <div>
+          <h2>Recently Used:</h2>
+          {previousUsedItems &&
+            previousUsedItems.map((item) => (
+              <StyledItem
+                onClick={addItemToListHandler}
+                data-id={item.id}
+                data-name={item.name}
+                data-type={item?.food_type}
+                key={item.id}
+              >
+                {item.name}
+              </StyledItem>
+            ))}
+        </div>
+      </StyledMainShopping>
     </StyledShoppingWrapper>
   );
 };
+
+const StyledMainShopping = styled.div`
+  background: #37474f;
+  box-shadow: 0px 10px 5px 0px rgba(0, 0, 0, 0.75);
+  padding: 0.5rem 0;
+  input {
+    margin: 2rem auto;
+    display: block;
+    text-align: center;
+    border: none;
+    width: 95%;
+    background: #253036;
+    color: white;
+    font-size: 1.5rem;
+    padding: 0rem 1rem;
+    border-radius: 5px;
+  }
+`;
 
 const StyledShoppingWrapper = styled.div`
   width: 100%;
@@ -181,40 +310,28 @@ const StyledShoppingWrapper = styled.div`
 `;
 
 const StyledShoppingItems = styled.div`
-  display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  grid-template-rows: 3rem auto;
-  grid-gap: 5px;
+  display: flex;
+  flex-wrap: wrap;
   justify-items: center;
   text-align: center;
-  background: #37474f;
-  box-shadow: 0px 10px 5px 0px rgba(0, 0, 0, 0.75);
+
   min-height: 50vh;
   padding: 1rem 1rem;
-  input {
-    border: none;
-    width: 95%;
-    grid-column: 1/-1;
-    height: 2rem;
-    background: #253036;
-    color: white;
-    font-size: 1.5rem;
-    padding: 0rem 1rem;
-    margin: 0 2rem;
-    border-radius: 5px;
-  }
 `;
 
 const StyledItem = styled(motion.div)`
-  height: 5rem;
+  height: 116px;
   cursor: pointer;
-  width: 5rem;
+  width: 98px;
+  display: block;
+  list-style-type: none;
   background-color: #a3b38c;
   border-radius: 5px;
   text-align: center;
   display: flex;
   justify-content: center;
   align-items: center;
+  margin: 0.3rem 0.3rem;
 `;
 
 const AddUserForm = styled(motion.div)`
