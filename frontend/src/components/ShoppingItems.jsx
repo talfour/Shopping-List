@@ -116,6 +116,13 @@ const ShoppingItems = ({ activeList, setActiveList, setLists, lists }) => {
         ...prevActiveList,
         items: newItemsArray,
       }));
+      const updatedLists = lists.map((list) => {
+        if (list.id === activeList.id) {
+          return { ...list, items: newItemsArray };
+        }
+        return list;
+      });
+      setLists(updatedLists);
 
       const newPreviousUsedItems = previousUsedItems.filter(
         (item) => item.id !== parseInt(newItem.id)
@@ -143,6 +150,13 @@ const ShoppingItems = ({ activeList, setActiveList, setLists, lists }) => {
         ...prevActiveList,
         items: newItemsArray,
       }));
+      const updatedLists = lists.map((list) => {
+        if (list.id === activeList.id) {
+          return { ...list, items: newItemsArray };
+        }
+        return list;
+      });
+      setLists(updatedLists);
     } catch (error) {
       console.log(error);
     }
@@ -232,6 +246,7 @@ const ShoppingItems = ({ activeList, setActiveList, setLists, lists }) => {
           {activeList &&
             activeList.items.map((item) => (
               <StyledItem
+                className="active-items"
                 onClick={removeItemFromListHandler}
                 data-id={item.id}
                 data-name={item.name}
@@ -320,6 +335,10 @@ const StyledShoppingItems = styled.div`
 `;
 
 const StyledItem = styled(motion.div)`
+  .active-items {
+    background: #bf616a;
+    color: white;
+  }
   height: 116px;
   cursor: pointer;
   width: 98px;
