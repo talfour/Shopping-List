@@ -5,7 +5,14 @@ import useAxiosPrivate from "../hooks/useAxiosPrivate";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUserPlus, faX } from "@fortawesome/free-solid-svg-icons";
 
-const ShoppingItems = ({ activeList, setActiveList, setLists, lists }) => {
+const ShoppingItems = ({
+  activeList,
+  setActiveList,
+  setLists,
+  lists,
+  searched,
+  setSearched,
+}) => {
   const [addUserDialog, setAddUserDialog] = useState(false);
   const [previousUsedItems, setPreviousUsedItems] = useState();
   const [newUser, setNewUser] = useState("");
@@ -30,6 +37,7 @@ const ShoppingItems = ({ activeList, setActiveList, setLists, lists }) => {
   const addNewListDialogHandler = () => {
     setAddUserDialog(true);
   };
+
   const exitNewListHandler = (e) => {
     const element = e.target;
     if (element.classList.contains("shadow")) {
@@ -102,6 +110,12 @@ const ShoppingItems = ({ activeList, setActiveList, setLists, lists }) => {
           return -1;
         }
         if (a.food_type < b.food_type) {
+          return 1;
+        }
+        if (a.name > b.name) {
+          return -1;
+        }
+        if (a.name < b.name) {
           return 1;
         }
         return 0;
@@ -257,8 +271,8 @@ const ShoppingItems = ({ activeList, setActiveList, setLists, lists }) => {
               </StyledItem>
             ))}
         </StyledShoppingItems>
-        <div>
-          <h2>Recently Used:</h2>
+        <h2>Recently Used:</h2>
+        <StyledShoppingItems>
           {previousUsedItems &&
             previousUsedItems.map((item) => (
               <StyledItem
@@ -271,7 +285,7 @@ const ShoppingItems = ({ activeList, setActiveList, setLists, lists }) => {
                 {item.name}
               </StyledItem>
             ))}
-        </div>
+        </StyledShoppingItems>
       </StyledMainShopping>
     </StyledShoppingWrapper>
   );
@@ -292,6 +306,10 @@ const StyledMainShopping = styled.div`
     font-size: 1.5rem;
     padding: 0rem 1rem;
     border-radius: 5px;
+  }
+  h2 {
+    padding: 1rem 1rem;
+    color: white;
   }
 `;
 
@@ -330,7 +348,7 @@ const StyledShoppingItems = styled.div`
   justify-items: center;
   text-align: center;
 
-  min-height: 50vh;
+  min-height: 20vh;
   padding: 1rem 1rem;
 `;
 
