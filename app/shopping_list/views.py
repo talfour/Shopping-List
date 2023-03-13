@@ -3,14 +3,12 @@ Views for shopping list APIs.
 """
 from django.db.models import Q
 
-from rest_framework import status
 from rest_framework import viewsets
 from rest_framework import mixins
-from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
-from core.models import ShoppingList, Item, User
+from core.models import ShoppingList, Item
 from shopping_list import serializers
 
 
@@ -24,9 +22,13 @@ class ShoppingListViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         """Retrieve shopping lists for authenticated user."""
-        return self.queryset.filter(
-            Q(user=self.request.user) | Q(additional_users=self.request.user)
-        ).order_by("-id").distinct()
+        return (
+            self.queryset.filter(
+                Q(user=self.request.user) | Q(additional_users=self.request.user)
+            )
+            .order_by("-id")
+            .distinct()
+        )
 
     def get_serializer_class(self):
         """Return the serializer class for request."""
@@ -38,6 +40,7 @@ class ShoppingListViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         """Create a new shopping list"""
         serializer.save(user=self.request.user)
+
 
 class ItemViewSet(
     mixins.DestroyModelMixin,
@@ -54,4 +57,11 @@ class ItemViewSet(
 
     def get_queryset(self):
         """Filter queryset to authenticated user."""
+        name = self.request.query_params.get("name", None)
+        if name:
+            return (
+                self.queryset.filter(user=self.request.user)
+                .filter(name__icontains=name)
+                .order_by("-name")
+            )
         return self.queryset.filter(user=self.request.user).order_by("-name")
