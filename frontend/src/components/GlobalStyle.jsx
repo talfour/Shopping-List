@@ -82,6 +82,10 @@ h2{
     margin-bottom: 0.5rem;
     text-align: center;
   }
+    .active-items {
+    background: #bf616a;
+    color: white;
+  }
 `;
 
 export default GlobalStyle;
