@@ -137,7 +137,7 @@ class PrivateRecipeApiTests(TestCase):
         payload = {
             "title": "New shopping list",
             "description": "New sample description",
-            "additional_users": [other_user.id],
+            "additional_users": [other_user.email],
         }
         url = detail_url(shopping.id)
         res = self.client.put(url, payload)

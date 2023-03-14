@@ -71,8 +71,8 @@ class PublicUserApiTests(TestCase):
 
         res = self.client.post(TOKEN_URL, payload)
         self.assertEqual(res.status_code, status.HTTP_200_OK)
-        self.assertIn("access", res.data)
-        self.assertIn("refresh", res.data)
+        self.assertIn("access_token", res.data)
+        self.assertIn("refresh_token", res.data)
 
     def test_create_token_bad_credentials(self):
         """Test returns error if credentials invalid."""
@@ -105,7 +105,7 @@ class PublicUserApiTests(TestCase):
 
         payload = {"email": user_details["email"], "password": user_details["password"]}
         token = self.client.post(TOKEN_URL, payload)
-        refresh = token.data["refresh"]
+        refresh = token.data["refresh_token"]
 
         res = self.client.post(reverse("user:token-refresh"), {"refresh": refresh})
         self.assertEqual(res.status_code, status.HTTP_200_OK)
