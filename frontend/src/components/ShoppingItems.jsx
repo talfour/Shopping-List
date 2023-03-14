@@ -5,22 +5,16 @@ import useAxiosPrivate from "../hooks/useAxiosPrivate";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUserPlus, faX } from "@fortawesome/free-solid-svg-icons";
 
-const ShoppingItems = ({
-  activeList,
-  setActiveList,
-  setLists,
-  lists,
-  searched,
-  setSearched,
-}) => {
+const ShoppingItems = ({ activeList, setActiveList, setLists, lists }) => {
   const [addUserDialog, setAddUserDialog] = useState(false);
   const [previousUsedItems, setPreviousUsedItems] = useState();
   const [newUser, setNewUser] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
   const [errMsg, setErrMsg] = useState("");
+  const [searched, setSearched] = useState("");
+  const [searchResult, setSearchResult] = useState([]);
 
   const axiosPrivateInstance = useAxiosPrivate();
-
   const removeListHandler = async () => {
     const response = await axiosPrivateInstance.delete(
       `/shopping_list/shopping_lists/${activeList.id}`
@@ -142,6 +136,10 @@ const ShoppingItems = ({
         (item) => item.id !== parseInt(newItem.id)
       );
       setPreviousUsedItems(newPreviousUsedItems);
+      const newSearchedItems = searchResult.filter(
+        (item) => item.id !== parseInt(newItem.id)
+      );
+      setSearchResult(newSearchedItems);
     } catch (error) {
       console.log(error);
     }
@@ -195,8 +193,29 @@ const ShoppingItems = ({
   }, [activeList]);
 
   const searchItemHandler = async (e) => {
+    setSearched(e);
+    setSearchResult([]);
     try {
-      const response = await axiosPrivateInstance.get();
+      const response = await axiosPrivateInstance.get(
+        `/shopping_list/items?name=${e}`
+      );
+      let result = [];
+      if (response.data.length > 0) {
+        const filterArray = [...activeList.items];
+
+        result = response.data.filter((item) => {
+          return !filterArray.some(
+            (filterItem) => parseInt(filterItem.id) === item.id
+          );
+        });
+        const newItem = { food_type: "", id: 0, name: e };
+        result.push(newItem);
+        setSearchResult(result);
+      } else {
+        const newItem = { food_type: "", id: 0, name: e };
+        result.push(newItem);
+        setSearchResult(result);
+      }
     } catch (error) {
       console.log(error);
     }
@@ -254,8 +273,35 @@ const ShoppingItems = ({
         />
       </div>
       <StyledMainShopping>
-        <input placeholder="What would you like to buy?" type="text"></input>
-
+        <input
+          value={searched}
+          onChange={(e) => searchItemHandler(e.target.value)}
+          placeholder="What would you like to buy?"
+          type="text"
+        ></input>
+        {searched ? (
+          <div>
+            <h2>Searched:</h2>
+            <StyledShoppingItems>
+              {searchResult
+                ? //
+                  searchResult.map((item) => (
+                    <StyledItem
+                      onClick={addItemToListHandler}
+                      data-id={item.id}
+                      data-name={item.name}
+                      data-type={item?.food_type}
+                      key={item.id}
+                    >
+                      {item.name}
+                    </StyledItem>
+                  ))
+                : ""}
+            </StyledShoppingItems>
+          </div>
+        ) : (
+          ""
+        )}
         <StyledShoppingItems>
           {activeList &&
             activeList.items.map((item) => (
@@ -304,7 +350,7 @@ const StyledMainShopping = styled.div`
     background: #253036;
     color: white;
     font-size: 1.5rem;
-    padding: 0rem 1rem;
+    padding: 0.8rem 1rem;
     border-radius: 5px;
   }
   h2 {
