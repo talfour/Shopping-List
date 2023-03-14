@@ -20,7 +20,6 @@ from rest_framework_simplejwt import (
 from user import serializers
 
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-from rest_framework_simplejwt.views import TokenObtainPairView
 
 
 def get_user_tokens(user):
@@ -73,7 +72,6 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
         token = super().get_token(user)
         token["name"] = user.name
         return token
-
 
 
 class CreateUserView(generics.CreateAPIView):
@@ -132,5 +130,5 @@ def logoutView(request):
         res["X-CSRFToken"] = None
 
         return res
-    except:
+    except Exception:
         raise rest_exceptions.ParseError("Invalid token")

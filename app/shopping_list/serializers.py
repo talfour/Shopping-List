@@ -15,17 +15,12 @@ class ItemSerializer(serializers.ModelSerializer):
         read_only_fields = ["id"]
 
 
-
-
 class ShoppingListSerializer(serializers.ModelSerializer):
     """Serializer for shopping lists."""
 
     items = ItemSerializer(many=True, required=False)
     additional_users = serializers.SlugRelatedField(
-        many=True,
-        queryset=User.objects.all(),
-        slug_field = 'email',
-        required=False
+        many=True, queryset=User.objects.all(), slug_field="email", required=False
     )
 
     class Meta:
