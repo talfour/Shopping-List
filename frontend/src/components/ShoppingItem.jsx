@@ -1,0 +1,1 @@
+// Here goes single shopping item to make code clear
