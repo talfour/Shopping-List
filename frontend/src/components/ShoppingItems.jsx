@@ -3,7 +3,12 @@ import styled from "styled-components";
 import { motion } from "framer-motion";
 import useAxiosPrivate from "../hooks/useAxiosPrivate";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faUserPlus, faX } from "@fortawesome/free-solid-svg-icons";
+import {
+  faUserPlus,
+  faX,
+  faEllipsisH,
+} from "@fortawesome/free-solid-svg-icons";
+import A from "../svg/A.svg";
 
 const ShoppingItems = ({ activeList, setActiveList, setLists, lists }) => {
   const [addUserDialog, setAddUserDialog] = useState(false);
@@ -313,6 +318,7 @@ const ShoppingItems = ({ activeList, setActiveList, setLists, lists }) => {
                 data-type={item?.food_type}
                 key={item.id}
               >
+                <FontAwesomeIcon icon={faEllipsisH} />
                 {item.name}
               </StyledItem>
             ))}
@@ -328,6 +334,7 @@ const ShoppingItems = ({ activeList, setActiveList, setLists, lists }) => {
                 data-type={item?.food_type}
                 key={item.id}
               >
+                <img src={A} />
                 {item.name}
               </StyledItem>
             ))}
@@ -401,20 +408,24 @@ const StyledShoppingItems = styled.div`
 const StyledItem = styled(motion.div)`
   .active-items {
     background: #bf616a;
-    color: white;
   }
+  color: white;
   height: 116px;
   cursor: pointer;
   width: 98px;
-  display: block;
   list-style-type: none;
   background-color: #a3b38c;
   border-radius: 5px;
   text-align: center;
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
   margin: 0.3rem 0.3rem;
+  img {
+    width: 3rem;
+    padding: 0.5rem 0;
+  }
 `;
 
 const AddUserForm = styled(motion.div)`
