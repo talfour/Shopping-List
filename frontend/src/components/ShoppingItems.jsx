@@ -3,12 +3,8 @@ import styled from "styled-components";
 import { motion } from "framer-motion";
 import useAxiosPrivate from "../hooks/useAxiosPrivate";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faUserPlus,
-  faX,
-  faEllipsisH,
-} from "@fortawesome/free-solid-svg-icons";
-import A from "../svg/A.svg";
+import { faUserPlus, faX } from "@fortawesome/free-solid-svg-icons";
+import ShoppingItem from "./ShoppingItem";
 
 const ShoppingItems = ({ activeList, setActiveList, setLists, lists }) => {
   const [addUserDialog, setAddUserDialog] = useState(false);
@@ -70,9 +66,7 @@ const ShoppingItems = ({ activeList, setActiveList, setLists, lists }) => {
     }
   };
 
-  const removeUserHandler = async (e) => {
-    // remove user from list by clicking X next to user name
-    const emailToRemove = e.target.dataset.email;
+  const removeUserHandler = async (emailToRemove) => {
     const prevUsers = activeList?.additional_users;
     try {
       const response = await axiosPrivateInstance.patch(
@@ -96,14 +90,15 @@ const ShoppingItems = ({ activeList, setActiveList, setLists, lists }) => {
     }
   };
 
-  const addItemToListHandler = async (e) => {
+  const addItemToListHandler = async (id, name, type) => {
     try {
       const prevItems = activeList?.items;
       const newItem = {
-        id: e.target.dataset.id,
-        name: e.target.dataset.name,
-        food_type: e.target.dataset.type,
+        id: id,
+        name: name,
+        food_type: type,
       };
+
       const newItemsArray = [...prevItems, newItem].sort((a, b) => {
         if (a.food_type > b.food_type) {
           return -1;
@@ -150,11 +145,11 @@ const ShoppingItems = ({ activeList, setActiveList, setLists, lists }) => {
     }
   };
 
-  const removeItemFromListHandler = async (e) => {
-    const itemToRemove = e.target.dataset.id;
+  const removeItemFromListHandler = async (itemId) => {
+    const itemToRemove = parseInt(itemId);
     const prevItems = [...activeList?.items];
     const newItemsArray = prevItems.filter(
-      (item) => parseInt(item.id) !== parseInt(itemToRemove)
+      (item) => parseInt(item.id) !== itemToRemove
     );
     try {
       const response = await axiosPrivateInstance.patch(
@@ -174,6 +169,10 @@ const ShoppingItems = ({ activeList, setActiveList, setLists, lists }) => {
         return list;
       });
       setLists(updatedLists);
+      const newSearchedItems = searchResult.filter(
+        (item) => item.id !== parseInt(itemToRemove)
+      );
+      setSearchResult(newSearchedItems);
     } catch (error) {
       console.log(error);
     }
@@ -193,10 +192,6 @@ const ShoppingItems = ({ activeList, setActiveList, setLists, lists }) => {
     }
   };
 
-  useEffect(() => {
-    listLastUsedItemsHandler();
-  }, [activeList]);
-
   const searchItemHandler = async (e) => {
     setSearched(e);
     setSearchResult([]);
@@ -205,16 +200,28 @@ const ShoppingItems = ({ activeList, setActiveList, setLists, lists }) => {
         `/shopping_list/items?name=${e}`
       );
       let result = [];
+      const filterArray = [...activeList.items];
       if (response.data.length > 0) {
-        const filterArray = [...activeList.items];
-
         result = response.data.filter((item) => {
           return !filterArray.some(
-            (filterItem) => parseInt(filterItem.id) === item.id
+            (filterItem) => filterItem.name === item.name
           );
         });
+        const newItems = response.data.filter((item) => {
+          return filterArray.some(
+            (filterItem) => filterItem.name === item.name
+          );
+        });
+        newItems.forEach((item) => {
+          item.isExisting = true;
+        });
+        result = result.concat(newItems);
+        console.log(result);
         const newItem = { food_type: "", id: 0, name: e };
-        result.push(newItem);
+        if (!result.some((item) => item.name === e)){
+          result.push(newItem);
+        }
+
         setSearchResult(result);
       } else {
         const newItem = { food_type: "", id: 0, name: e };
@@ -225,6 +232,10 @@ const ShoppingItems = ({ activeList, setActiveList, setLists, lists }) => {
       console.log(error);
     }
   };
+
+  useEffect(() => {
+    listLastUsedItemsHandler();
+  }, [activeList]);
 
   return (
     <StyledShoppingWrapper>
@@ -258,8 +269,7 @@ const ShoppingItems = ({ activeList, setActiveList, setLists, lists }) => {
                       padding: "1rem 1rem",
                     }}
                     icon={faX}
-                    onClick={removeUserHandler}
-                    data-email={user}
+                    onClick={() => removeUserHandler(user)}
                   />
                 </span>
               ))}
@@ -288,20 +298,23 @@ const ShoppingItems = ({ activeList, setActiveList, setLists, lists }) => {
           <div>
             <h2>Searched:</h2>
             <StyledShoppingItems>
-              {searchResult
-                ? //
-                  searchResult.map((item) => (
-                    <StyledItem
-                      onClick={addItemToListHandler}
-                      data-id={item.id}
-                      data-name={item.name}
-                      data-type={item?.food_type}
-                      key={item.id}
-                    >
-                      {item.name}
-                    </StyledItem>
-                  ))
-                : ""}
+              {searchResult &&
+                searchResult.map((item) => (
+                  <div key={item.id}>
+                    {item.isExisting ? (
+                      <ShoppingItem
+                        item={item}
+                        className="active-items"
+                        removeItemFromListHandler={removeItemFromListHandler}
+                      ></ShoppingItem>
+                    ) : (
+                      <ShoppingItem
+                        item={item}
+                        addItemToListHandler={addItemToListHandler}
+                      ></ShoppingItem>
+                    )}
+                  </div>
+                ))}
             </StyledShoppingItems>
           </div>
         ) : (
@@ -310,33 +323,23 @@ const ShoppingItems = ({ activeList, setActiveList, setLists, lists }) => {
         <StyledShoppingItems>
           {activeList &&
             activeList.items.map((item) => (
-              <StyledItem
-                className="active-items"
-                onClick={removeItemFromListHandler}
-                data-id={item.id}
-                data-name={item.name}
-                data-type={item?.food_type}
+              <ShoppingItem
                 key={item.id}
-              >
-                <FontAwesomeIcon icon={faEllipsisH} />
-                {item.name}
-              </StyledItem>
+                item={item}
+                removeItemFromListHandler={removeItemFromListHandler}
+                className="active-items"
+              ></ShoppingItem>
             ))}
         </StyledShoppingItems>
         <h2>Recently Used:</h2>
         <StyledShoppingItems>
           {previousUsedItems &&
             previousUsedItems.map((item) => (
-              <StyledItem
-                onClick={addItemToListHandler}
-                data-id={item.id}
-                data-name={item.name}
-                data-type={item?.food_type}
+              <ShoppingItem
                 key={item.id}
-              >
-                <img src={A} />
-                {item.name}
-              </StyledItem>
+                item={item}
+                addItemToListHandler={addItemToListHandler}
+              ></ShoppingItem>
             ))}
         </StyledShoppingItems>
       </StyledMainShopping>
@@ -403,29 +406,6 @@ const StyledShoppingItems = styled.div`
 
   min-height: 20vh;
   padding: 1rem 1rem;
-`;
-
-const StyledItem = styled(motion.div)`
-  .active-items {
-    background: #bf616a;
-  }
-  color: white;
-  height: 116px;
-  cursor: pointer;
-  width: 98px;
-  list-style-type: none;
-  background-color: #a3b38c;
-  border-radius: 5px;
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  margin: 0.3rem 0.3rem;
-  img {
-    width: 3rem;
-    padding: 0.5rem 0;
-  }
 `;
 
 const AddUserForm = styled(motion.div)`
