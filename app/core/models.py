@@ -79,6 +79,7 @@ class Item(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     last_time_used = models.DateTimeField(default=timezone.now)
     food_type = models.CharField(choices=FOOD_TYPE, blank=True, max_length=100)
+    description = models.CharField(max_length=255)
 
     def __str__(self):
         return self.name
