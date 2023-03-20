@@ -3,7 +3,7 @@ import styled from "styled-components";
 import { motion } from "framer-motion";
 import useAxiosPrivate from "../hooks/useAxiosPrivate";
 
-const ShoppingLists = ({ lists, setLists, activeList, setActiveList }) => {
+const ShoppingLists = ({ lists, setLists, setActiveList }) => {
   const axiosPrivateInstance = useAxiosPrivate();
   const [isNewVisible, setIsNewVisible] = useState();
   const [title, setTitle] = useState("");
