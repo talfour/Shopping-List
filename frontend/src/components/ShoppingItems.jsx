@@ -90,13 +90,14 @@ const ShoppingItems = ({ activeList, setActiveList, setLists, lists }) => {
     }
   };
 
-  const addItemToListHandler = async (id, name, type) => {
+  const addItemToListHandler = async (id, name, type, description) => {
     try {
       const prevItems = activeList?.items;
       const newItem = {
         id: id,
         name: name,
         food_type: type,
+        description: description
       };
 
       const newItemsArray = [...prevItems, newItem].sort((a, b) => {
@@ -186,6 +187,7 @@ const ShoppingItems = ({ activeList, setActiveList, setLists, lists }) => {
         (item) =>
           !activeList?.items?.some((item2) => item.id === parseInt(item2.id))
       );
+      console.log(filteredUsedItems);
       setPreviousUsedItems(filteredUsedItems);
     } catch (error) {
       console.log(error);
