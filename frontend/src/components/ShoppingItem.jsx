@@ -1,10 +1,9 @@
 // Here goes single shopping item to make code clear
+import { useState } from "react";
 import styled from "styled-components";
 import { motion } from "framer-motion";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faEllipsisH,
-} from "@fortawesome/free-solid-svg-icons";
+import { faEllipsisH } from "@fortawesome/free-solid-svg-icons";
 
 import A from "../svg/A.svg";
 import B from "../svg/B.svg";
@@ -32,8 +31,16 @@ import Y from "../svg/Y.svg";
 import Z from "../svg/Z.svg";
 import Q from "../svg/Q.svg";
 
-const ShoppingItem = ({ handler, item }) => {
-    const getFirstLetter = (item) => {
+const ShoppingItem = (props) => {
+  const { item } = props;
+  const [editItemDialog, setEditItemDialog] = useState(false);
+
+  const [itemToEdit, setItemToEdit] = useState("");
+  const [description, setDescription] = useState("");
+  const [itemType, setItemType] = useState("");
+  const [successMsg, setSuccessMsg] = useState("");
+  const [errMsg, setErrMsg] = useState("");
+  const getFirstLetter = (item) => {
     switch (item) {
       case "A":
         return A;
@@ -88,21 +95,109 @@ const ShoppingItem = ({ handler, item }) => {
       default:
         return X;
     }
-    };
+  };
+
+  const addNewUserHandler = async (e) => {
+    e.preventDefault();
+    setEditItemDialog(true);
+    try {
+      const response = await axiosPrivateInstance.patch(
+        `/shopping_list/shopping_lists/${activeList.id}/`,
+        {
+          additional_users: [...prevUsers, newUser],
+        }
+      );
+      if (response.status === 200) {
+        setSuccessMsg("User Successfully Added");
+        setActiveList((prevActiveList) => ({
+          ...prevActiveList,
+          additional_users: [...prevActiveList.additional_users, newUser],
+        }));
+      }
+    } catch (error) {
+      setErrMsg("User with provided email does not exist.");
+    }
+  };
+
+  const exitEditHandler = (e) => {
+    const element = e.target;
+    if (element.classList.contains("shadow")) {
+      setEditItemDialog(false);
+      setErrMsg("");
+      setSuccessMsg("");
+      setItemToEdit("");
+    }
+  };
+
+  const editItemHandler = (item) => {
+    console.log(item);
+    setEditItemDialog(true);
+    setItemToEdit(item);
+    setDescription(item?.description);
+    console.log(itemToEdit);
+  };
 
   return (
-    <StyledItem
-      onClick={handler}
-      data-id={item.id}
-      data-name={item.name}
-      data-type={item?.food_type}
-          key={item.id}
-
-    >
-      <FontAwesomeIcon icon={faEllipsisH} />
-      <img src={getFirstLetter(item.name.charAt(0).toUpperCase())}></img>
-      {item.name}
-    </StyledItem>
+    <>
+      <StyledNewList
+        onClick={exitEditHandler}
+        className={editItemDialog ? "newListActive shadow" : "newListDisabled"}
+      >
+        <p className={errMsg ? "errmsg" : "offscreen"}>{errMsg}</p>
+        <p className={successMsg ? "successmsg" : "offscreen"}>{successMsg}</p>
+        <EditItemForm>
+          <h1>Edit Item { itemToEdit.name}</h1>
+          <form onSubmit={addNewUserHandler} action="POST">
+            <input
+              onChange={(e) => setDescription(e.target.value)}
+              value={description}
+              type="text"
+              placeholder="Description"
+            />
+            <select>
+              <option value="vegetables">vegetables</option>
+              <option value="fruits">fruits</option>
+              <option value="grains, beans and nuts">
+                grains, beans and nuts
+              </option>
+              <option value="meat and poultry">meat and poultry</option>
+              <option value="fish and seafood">fish and seafood</option>
+              <option value="dairy foods">dairy foods</option>
+              <option value="fat">fat</option>
+              <option value="sweets">sweets</option>
+              <option value="spices">spices</option>
+            </select>
+            <button type="submit">Submit</button>
+          </form>
+        </EditItemForm>
+      </StyledNewList>
+      <StyledItem
+        className={props.className ? props.className : ""}
+        onClick={() =>
+          props.addItemToListHandler
+            ? props.addItemToListHandler(
+                item.id,
+                item.name,
+                item.food_type,
+                item.description ? item.description : ""
+              )
+            : props.removeItemFromListHandler(item.id)
+        }
+      >
+        <FontAwesomeIcon
+          icon={faEllipsisH}
+          onClick={(e) => {
+            e.stopPropagation();
+            editItemHandler(item);
+          }}
+        />
+        <img
+          src={getFirstLetter(props.item.name.charAt(0).toUpperCase())}
+        ></img>
+        <p>{props.item.name}</p>
+        <span>{item.description}</span>
+      </StyledItem>
+    </>
   );
 };
 
@@ -124,8 +219,86 @@ const StyledItem = styled(motion.div)`
   align-items: center;
   margin: 0.3rem 0.3rem;
   img {
-    width: 3rem;
+    width: 2rem;
+    max-height: 45px;
     padding: 0.5rem 0;
+  }
+  p {
+    padding: 0;
+    color: white;
+  }
+  svg {
+    margin-left: auto;
+    padding: 0.25rem 0.5rem;
+  }
+  span{
+    font-size: 0.8rem;
+    margin: 0.2rem 0;
+  }
+`;
+
+const StyledNewList = styled(motion.div)`
+  width: 100%;
+  min-height: 100vh;
+  background: rgba(0, 0, 0, 0.1);
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 5;
+  transition: all 0.75s ease;
+`;
+
+const EditItemForm = styled(motion.div)`
+  min-height: 50vh;
+  width: 50%;
+  border-radius: 1rem;
+  padding: 2rem 5rem;
+  background: white;
+  position: absolute;
+  top: 25%;
+  left: 25%;
+  color: black;
+  z-index: 10;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-evenly;
+    width: 100%;
+    input {
+      border-radius: 5px;
+      background-color: #e2e2e2;
+      border: none;
+      padding: 1rem 1rem;
+      font-size: 1.2rem;
+      margin-bottom: 1rem;
+      width: 100%;
+      text-align: center;
+      color: #37474f;
+    }
+    select {
+      // A reset of styles, including removing the default dropdown arrow
+      appearance: none;
+      // Additional resets for further consistency
+      background-color: #e2e2e2;
+      border: none;
+      padding: 1rem;
+      margin: 0;
+      width: 100%;
+      text-align: center;
+      margin: 1rem 0;
+      color: #37474f;
+      option:hover{
+        background-color: #37474f;
+      }
+    }
+    button {
+      background-color: #37474f;
+    }
   }
 `;
 
