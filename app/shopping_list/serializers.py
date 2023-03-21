@@ -13,6 +13,9 @@ class ItemSerializer(serializers.ModelSerializer):
         model = Item
         fields = ["id", "name", "food_type", "description"]
         read_only_fields = ["id"]
+        extra_kwargs = {
+            "description": {"required": False, "allow_null": True, "allow_blank": True}
+        }
 
 
 class ShoppingListSerializer(serializers.ModelSerializer):
