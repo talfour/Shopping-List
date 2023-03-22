@@ -1,16 +1,19 @@
-import { useEffect, useState, useContext } from "react";
+import { useEffect, useState } from "react";
 import useAxiosPrivate from "../hooks/useAxiosPrivate";
 import styled from "styled-components";
 import { motion } from "framer-motion";
 import useAuth from "../hooks/useAuth";
 import ShoppingLists from "../components/ShoppingLists";
 import ShoppingItems from "../components/ShoppingItems";
+import sortFoodItemsByTypeAndName from "../Utils";
 
 const Home = () => {
   const { user, setUser } = useAuth();
   const [lists, setLists] = useState([]);
   const axiosPrivateInstance = useAxiosPrivate();
   const [activeList, setActiveList] = useState();
+
+
 
   useEffect(() => {
     async function getShoppingLists() {
@@ -19,7 +22,11 @@ const Home = () => {
           "shopping_list/shopping_lists/"
         );
         if (response?.status === 200) {
-          setLists(response.data);
+          const sortedLists = response.data.map((list) => {
+            const sortedItems = sortFoodItemsByTypeAndName(list.items)
+            return {...list, items: sortedItems}
+          });
+          setLists(sortedLists);
           setActiveList(response.data[0]);
         }
       } catch (error) {
