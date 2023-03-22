@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import useAuth from "../hooks/useAuth";
 import useAxiosPrivate from "../hooks/useAxiosPrivate";
 import useLogout from "../hooks/useLogout";
+import styled from "styled-components";
 
 export default function User() {
   const { user, setUser } = useAuth();
@@ -28,12 +29,20 @@ export default function User() {
   }, []);
 
   return (
-    <div>
-      <h3>{user?.name}</h3>
-      <h4>{user?.email}</h4>
-      <button disabled={loading} type="button" onClick={onLogout}>
-        Logout
-      </button>
-    </div>
+    <StyledUserInfo>
+      <h3>User name: {user?.name}</h3>
+      <h3>User email: {user?.email}</h3>
+    </StyledUserInfo>
   );
 }
+
+const StyledUserInfo = styled.div`
+  min-height: 50vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  h3{
+    padding: 1rem 0rem;
+  }
+`;
