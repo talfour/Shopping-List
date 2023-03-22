@@ -71,6 +71,7 @@ FOOD_TYPE = (
     ("fat", "fat"),
     ("sweets", "sweets"),
     ("spices", "spices"),
+    ("other", "other"),
 )
 
 
