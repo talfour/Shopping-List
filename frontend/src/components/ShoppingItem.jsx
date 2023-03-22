@@ -4,7 +4,9 @@ import styled from "styled-components";
 import { motion } from "framer-motion";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEllipsisH } from "@fortawesome/free-solid-svg-icons";
+import useAxiosPrivate from "../hooks/useAxiosPrivate";
 
+import { fadeIn } from "../animations";
 import A from "../svg/A.svg";
 import B from "../svg/B.svg";
 import C from "../svg/C.svg";
@@ -31,7 +33,9 @@ import Y from "../svg/Y.svg";
 import Z from "../svg/Z.svg";
 import Q from "../svg/Q.svg";
 
+
 const ShoppingItem = (props) => {
+  const axiosPrivateInstance = useAxiosPrivate();
   const { item } = props;
   const [editItemDialog, setEditItemDialog] = useState(false);
 
@@ -97,25 +101,38 @@ const ShoppingItem = (props) => {
     }
   };
 
-  const addNewUserHandler = async (e) => {
+  const editItemSubmitHandler = async (e) => {
     e.preventDefault();
     setEditItemDialog(true);
     try {
       const response = await axiosPrivateInstance.patch(
-        `/shopping_list/shopping_lists/${activeList.id}/`,
+        `/shopping_list/items/${itemToEdit.id}/`,
         {
-          additional_users: [...prevUsers, newUser],
+          description: description,
+          food_type: itemType,
         }
       );
       if (response.status === 200) {
-        setSuccessMsg("User Successfully Added");
-        setActiveList((prevActiveList) => ({
-          ...prevActiveList,
-          additional_users: [...prevActiveList.additional_users, newUser],
-        }));
+        const updatedItems = props.activeList.items.map((item) => {
+          if (item.id === itemToEdit.id) {
+            return {
+              ...item,
+              description: description,
+              food_type: itemType,
+            };
+          }
+          return item;
+        });
+        const updatedActiveList = {
+          ...props.activeList,
+          items: updatedItems,
+        };
+        props.setActiveList(updatedActiveList);
+        setSuccessMsg("Item updated");
       }
     } catch (error) {
-      setErrMsg("User with provided email does not exist.");
+      console.log(error);
+      setErrMsg("There was an error");
     }
   };
 
@@ -130,11 +147,14 @@ const ShoppingItem = (props) => {
   };
 
   const editItemHandler = (item) => {
-    console.log(item);
     setEditItemDialog(true);
     setItemToEdit(item);
+    setItemType(item.food_type);
     setDescription(item?.description);
-    console.log(itemToEdit);
+  };
+
+  const handleItemTypeChange = (e) => {
+    setItemType(e.target.value);
   };
 
   return (
@@ -146,15 +166,15 @@ const ShoppingItem = (props) => {
         <p className={errMsg ? "errmsg" : "offscreen"}>{errMsg}</p>
         <p className={successMsg ? "successmsg" : "offscreen"}>{successMsg}</p>
         <EditItemForm>
-          <h1>Edit Item { itemToEdit.name}</h1>
-          <form onSubmit={addNewUserHandler} action="POST">
+          <h1>Edit Item {itemToEdit.name}</h1>
+          <form onSubmit={editItemSubmitHandler} action="POST">
             <input
               onChange={(e) => setDescription(e.target.value)}
               value={description}
               type="text"
               placeholder="Description"
             />
-            <select>
+            <select value={itemType} onChange={handleItemTypeChange}>
               <option value="vegetables">vegetables</option>
               <option value="fruits">fruits</option>
               <option value="grains, beans and nuts">
@@ -166,12 +186,18 @@ const ShoppingItem = (props) => {
               <option value="fat">fat</option>
               <option value="sweets">sweets</option>
               <option value="spices">spices</option>
+              <option value="other">other</option>
             </select>
             <button type="submit">Submit</button>
           </form>
         </EditItemForm>
       </StyledNewList>
       <StyledItem
+        variants={fadeIn}
+        initial="hidden"
+        animate="show"
+        exit="exit"
+        transition={{ duration: 0.5 }}
         className={props.className ? props.className : ""}
         onClick={() =>
           props.addItemToListHandler
@@ -184,18 +210,20 @@ const ShoppingItem = (props) => {
             : props.removeItemFromListHandler(item.id)
         }
       >
-        <FontAwesomeIcon
-          icon={faEllipsisH}
-          onClick={(e) => {
-            e.stopPropagation();
-            editItemHandler(item);
-          }}
-        />
+        {props.editable && (
+          <FontAwesomeIcon
+            icon={faEllipsisH}
+            onClick={(e) => {
+              e.stopPropagation();
+              editItemHandler(item);
+            }}
+          />
+        )}
         <img
           src={getFirstLetter(props.item.name.charAt(0).toUpperCase())}
         ></img>
         <p>{props.item.name}</p>
-        <span>{item.description}</span>
+        {item.description && <span>{item.description}</span>}
       </StyledItem>
     </>
   );
@@ -231,7 +259,7 @@ const StyledItem = styled(motion.div)`
     margin-left: auto;
     padding: 0.25rem 0.5rem;
   }
-  span{
+  span {
     font-size: 0.8rem;
     margin: 0.2rem 0;
   }
@@ -292,7 +320,7 @@ const EditItemForm = styled(motion.div)`
       text-align: center;
       margin: 1rem 0;
       color: #37474f;
-      option:hover{
+      option:hover {
         background-color: #37474f;
       }
     }
