@@ -5,6 +5,7 @@ import useAxiosPrivate from "../hooks/useAxiosPrivate";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUserPlus, faX } from "@fortawesome/free-solid-svg-icons";
 import ShoppingItem from "./ShoppingItem";
+import sortFoodItemsByTypeAndName from "../Utils";
 
 const ShoppingItems = ({ activeList, setActiveList, setLists, lists }) => {
   const [addUserDialog, setAddUserDialog] = useState(false);
@@ -16,6 +17,7 @@ const ShoppingItems = ({ activeList, setActiveList, setLists, lists }) => {
   const [searchResult, setSearchResult] = useState([]);
 
   const axiosPrivateInstance = useAxiosPrivate();
+
   const removeListHandler = async () => {
     const response = await axiosPrivateInstance.delete(
       `/shopping_list/shopping_lists/${activeList.id}`
@@ -95,48 +97,41 @@ const ShoppingItems = ({ activeList, setActiveList, setLists, lists }) => {
       const prevItems = activeList?.items;
       const newItem = {
         id: id,
-        name: name,
+        name: name.toLowerCase(),
         food_type: type,
-        description: description
+        description: description,
       };
 
-      const newItemsArray = [...prevItems, newItem].sort((a, b) => {
-        if (a.food_type > b.food_type) {
-          return -1;
-        }
-        if (a.food_type < b.food_type) {
-          return 1;
-        }
-        if (a.name > b.name) {
-          return -1;
-        }
-        if (a.name < b.name) {
-          return 1;
-        }
-        return 0;
-      });
+      const newItemsArray = [...prevItems, newItem];
+      const sortedItemsArray = sortFoodItemsByTypeAndName(newItemsArray);
       const response = await axiosPrivateInstance.patch(
         `/shopping_list/shopping_lists/${activeList.id}/`,
         {
-          items: newItemsArray,
+          items: sortedItemsArray,
         }
       );
+      // Update item id if new was created
+      setActiveList(response.data);
       setActiveList((prevActiveList) => ({
         ...prevActiveList,
-        items: newItemsArray,
+        items: sortFoodItemsByTypeAndName(response.data.items),
       }));
+
       const updatedLists = lists.map((list) => {
         if (list.id === activeList.id) {
-          return { ...list, items: newItemsArray };
+          return { ...list, items: sortedItemsArray };
         }
         return list;
       });
       setLists(updatedLists);
 
+      // Remove item from used list
       const newPreviousUsedItems = previousUsedItems.filter(
         (item) => item.id !== parseInt(newItem.id)
       );
       setPreviousUsedItems(newPreviousUsedItems);
+
+      //Remove item from search result
       const newSearchedItems = searchResult.filter(
         (item) => item.id !== parseInt(newItem.id)
       );
@@ -187,7 +182,6 @@ const ShoppingItems = ({ activeList, setActiveList, setLists, lists }) => {
         (item) =>
           !activeList?.items?.some((item2) => item.id === parseInt(item2.id))
       );
-      console.log(filteredUsedItems);
       setPreviousUsedItems(filteredUsedItems);
     } catch (error) {
       console.log(error);
@@ -195,7 +189,7 @@ const ShoppingItems = ({ activeList, setActiveList, setLists, lists }) => {
   };
 
   const searchItemHandler = async (e) => {
-    setSearched(e);
+    setSearched(e.toLowerCase());
     setSearchResult([]);
     try {
       const response = await axiosPrivateInstance.get(
@@ -218,15 +212,14 @@ const ShoppingItems = ({ activeList, setActiveList, setLists, lists }) => {
           item.isExisting = true;
         });
         result = result.concat(newItems);
-        console.log(result);
-        const newItem = { food_type: "", id: 0, name: e };
-        if (!result.some((item) => item.name === e)){
+        const newItem = { id: 0, name: e };
+        if (!result.some((item) => item.name === e)) {
           result.push(newItem);
         }
 
         setSearchResult(result);
       } else {
-        const newItem = { food_type: "", id: 0, name: e };
+        const newItem = { food_type: "other", id: 0, name: e };
         result.push(newItem);
         setSearchResult(result);
       }
@@ -306,8 +299,11 @@ const ShoppingItems = ({ activeList, setActiveList, setLists, lists }) => {
                     {item.isExisting ? (
                       <ShoppingItem
                         item={item}
+                        activeList={activeList}
+                        setActiveList={setActiveList}
                         className="active-items"
                         removeItemFromListHandler={removeItemFromListHandler}
+                        editable={false}
                       ></ShoppingItem>
                     ) : (
                       <ShoppingItem
@@ -328,8 +324,11 @@ const ShoppingItems = ({ activeList, setActiveList, setLists, lists }) => {
               <ShoppingItem
                 key={item.id}
                 item={item}
+                activeList={activeList}
+                setActiveList={setActiveList}
                 removeItemFromListHandler={removeItemFromListHandler}
                 className="active-items"
+                editable={true}
               ></ShoppingItem>
             ))}
         </StyledShoppingItems>
@@ -339,8 +338,11 @@ const ShoppingItems = ({ activeList, setActiveList, setLists, lists }) => {
             previousUsedItems.map((item) => (
               <ShoppingItem
                 key={item.id}
+                activeList={activeList}
+                setActiveList={setActiveList}
                 item={item}
                 addItemToListHandler={addItemToListHandler}
+                editable={true}
               ></ShoppingItem>
             ))}
         </StyledShoppingItems>
