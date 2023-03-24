@@ -363,6 +363,9 @@ const StyledRegistration = styled.section`
   .login {
     text-align: center;
   }
+  @media (max-width: 930px) {
+    width: 80%;
+  }
 `;
 
 export default Register;
