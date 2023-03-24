@@ -14,9 +14,8 @@ const ShoppingLists = ({
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
 
-  const shoppingListHandler = (e) => {
-    const listID = e.target.dataset.tag;
-    const list = lists.filter((l) => l.id == listID);
+  const shoppingListHandler = (listId) => {
+    const list = lists.filter((l) => l.id == listId);
     setActiveList(list[0]);
   };
 
@@ -82,8 +81,7 @@ const ShoppingLists = ({
       {lists.map((list) => (
         <StyledListItem
           key={list.id}
-          onClick={shoppingListHandler}
-          data-tag={list.id}
+          onClick={() => shoppingListHandler(list.id)}
         >
           <h3>{list.title}</h3>
           {list.items.length ? <span>{list.items.length}</span> : ""}
