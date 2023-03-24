@@ -33,17 +33,16 @@ import Y from "../svg/Y.svg";
 import Z from "../svg/Z.svg";
 import Q from "../svg/Q.svg";
 
-
 const ShoppingItem = (props) => {
   const axiosPrivateInstance = useAxiosPrivate();
   const { item } = props;
   const [editItemDialog, setEditItemDialog] = useState(false);
-
   const [itemToEdit, setItemToEdit] = useState("");
   const [description, setDescription] = useState("");
   const [itemType, setItemType] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
   const [errMsg, setErrMsg] = useState("");
+
   const getFirstLetter = (item) => {
     switch (item) {
       case "A":
@@ -263,12 +262,31 @@ const StyledItem = styled(motion.div)`
     font-size: 0.8rem;
     margin: 0.2rem 0;
   }
+  @media (max-width: 930px) {
+    width: 70px;
+    height: 90px;
+    justify-content: space-evenly;
+    img {
+      width: 1.5rem;
+      padding: 0;
+    }
+    p {
+      font-size: 0.9rem;
+    }
+    svg {
+      padding: 0 0.25rem;
+      height: 0.8rem;
+    }
+    span {
+      color: #d6d6d6;
+    }
+  }
 `;
 
 const StyledNewList = styled(motion.div)`
   width: 100%;
   min-height: 100vh;
-  background: rgba(0, 0, 0, 0.1);
+  background: rgba(0, 0, 0, 0.5);
   position: fixed;
   top: 0;
   left: 0;
@@ -327,6 +345,14 @@ const EditItemForm = styled(motion.div)`
     button {
       background-color: #37474f;
     }
+  }
+  @media (max-width: 930px) {
+    width: 80%;
+    left: 10%;
+    padding: 1rem 1rem;
+  }
+  h1 {
+    font-size: 1.8rem;
   }
 `;
 

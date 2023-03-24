@@ -3,11 +3,11 @@ import styled from "styled-components";
 import { motion } from "framer-motion";
 import useAxiosPrivate from "../hooks/useAxiosPrivate";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faUserPlus, faX } from "@fortawesome/free-solid-svg-icons";
+import { faBars, faUserPlus, faX } from "@fortawesome/free-solid-svg-icons";
 import ShoppingItem from "./ShoppingItem";
 import sortFoodItemsByTypeAndName from "../Utils";
 
-const ShoppingItems = ({ activeList, setActiveList, setLists, lists }) => {
+const ShoppingItems = ({ activeList, setActiveList, setLists, lists, showList, setShowList }) => {
   const [addUserDialog, setAddUserDialog] = useState(false);
   const [previousUsedItems, setPreviousUsedItems] = useState();
   const [newUser, setNewUser] = useState("");
@@ -15,6 +15,7 @@ const ShoppingItems = ({ activeList, setActiveList, setLists, lists }) => {
   const [errMsg, setErrMsg] = useState("");
   const [searched, setSearched] = useState("");
   const [searchResult, setSearchResult] = useState([]);
+
 
   const axiosPrivateInstance = useAxiosPrivate();
 
@@ -234,6 +235,9 @@ const ShoppingItems = ({ activeList, setActiveList, setLists, lists }) => {
 
   return (
     <StyledShoppingWrapper>
+      {showList && (
+        <div>Test</div>
+      )}
       <StyledNewList
         onClick={exitNewListHandler}
         className={addUserDialog ? "newListActive shadow" : "newListDisabled"}
@@ -258,11 +262,6 @@ const ShoppingItems = ({ activeList, setActiveList, setLists, lists }) => {
                 <span key={user}>
                   {user}
                   <FontAwesomeIcon
-                    style={{
-                      color: "red",
-                      cursor: "pointer",
-                      padding: "1rem 1rem",
-                    }}
                     icon={faX}
                     onClick={() => removeUserHandler(user)}
                   />
@@ -273,8 +272,13 @@ const ShoppingItems = ({ activeList, setActiveList, setLists, lists }) => {
         </AddUserForm>
       </StyledNewList>
       <div className="top-section">
+        <FontAwesomeIcon
+          onClick={() => setShowList(!showList)}
+          className="mobile"
+          icon={faBars}
+        ></FontAwesomeIcon>
         <span onClick={removeListHandler}>Delete list</span>
-        <h2>{activeList && activeList.title}</h2>
+        <h2 className="mobile-hidden">{activeList && activeList.title}</h2>
 
         <FontAwesomeIcon
           className="add-user"
@@ -385,6 +389,9 @@ const StyledShoppingWrapper = styled.div`
     margin-bottom: 1rem;
     box-shadow: 0px 10px 5px 0px rgba(0, 0, 0, 0.75);
     min-height: 8vh;
+    .mobile {
+      display: none;
+    }
     span {
       background-color: #bf616a;
       padding: 1rem 1rem;
@@ -398,6 +405,16 @@ const StyledShoppingWrapper = styled.div`
         color: limegreen;
         scale: 120%;
       }
+    }
+  }
+  @media (max-width: 930px) {
+    flex: auto;
+    .mobile {
+      display: block !important;
+      cursor: pointer;
+    }
+    .mobile-hidden {
+      display: none;
     }
   }
 `;
@@ -451,6 +468,22 @@ const AddUserForm = styled(motion.div)`
     display: flex;
     flex-direction: column;
     font-size: 0.8rem;
+  }
+  span {
+    padding: 1rem 1rem;
+    svg {
+      color: red;
+      cursor: pointer;
+      padding: 0 1rem;
+    }
+  }
+  @media (max-width: 930px) {
+    width: 80%;
+    left: 10%;
+    padding: 1rem 1rem;
+  }
+  h1 {
+    font-size: 1.8rem;
   }
 `;
 

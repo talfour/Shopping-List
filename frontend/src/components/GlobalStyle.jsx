@@ -8,17 +8,11 @@ const GlobalStyle = createGlobalStyle`
     box-sizing: border-box;
 }
 
-/* html{
-    @media (max-width: 1700px){
-        font-size: 75%;
-    }
-    @media (max-width: 1300px){
+html{
+    @media (max-width: 930px){
         font-size: 80%;
     }
-    @media (max-width: 1300px){
-        font-size: 80%;
-    }
-} */
+}
 
 body{
   font-family: "Lato", sans-serif;
@@ -59,7 +53,8 @@ h2{
     }
 
 .newListDisabled{
-    width: 0;
+    position: absolute;
+    left: -3000px;
     opacity: 0;
 }
   .offscreen {

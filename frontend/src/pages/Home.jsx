@@ -12,8 +12,7 @@ const Home = () => {
   const [lists, setLists] = useState([]);
   const axiosPrivateInstance = useAxiosPrivate();
   const [activeList, setActiveList] = useState();
-
-
+  const [showList, setShowList] = useState(false);       
 
   useEffect(() => {
     async function getShoppingLists() {
@@ -23,8 +22,8 @@ const Home = () => {
         );
         if (response?.status === 200) {
           const sortedLists = response.data.map((list) => {
-            const sortedItems = sortFoodItemsByTypeAndName(list.items)
-            return {...list, items: sortedItems}
+            const sortedItems = sortFoodItemsByTypeAndName(list.items);
+            return { ...list, items: sortedItems };
           });
           setLists(sortedLists);
           setActiveList(response.data[0]);
@@ -60,6 +59,9 @@ const StyledMain = styled(motion.div)`
   padding: 5rem 20rem;
   min-height: 80vh;
   gap: 2rem;
+  @media (max-width: 930px) {
+    padding: 2rem 1rem;
+  }
 `;
 
 export default Home;

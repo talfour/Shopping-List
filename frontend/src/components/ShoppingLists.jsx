@@ -9,6 +9,7 @@ const ShoppingLists = ({ lists, setLists, setActiveList }) => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
 
+
   const shoppingListHandler = (e) => {
     const listID = e.target.dataset.tag;
     const list = lists.filter((l) => l.id == listID);
@@ -43,7 +44,7 @@ const ShoppingLists = ({ lists, setLists, setActiveList }) => {
   };
 
   return (
-    <StyledShoppingList>
+    <StyledShoppingList className={setShowList ? "showListActive": "showListDisabled"}>
       <StyledNewList
         onClick={exitNewListHandler}
         className={isNewVisible ? "newListActive shadow" : "newListDisabled"}
@@ -105,6 +106,9 @@ const StyledShoppingList = styled.div`
         color: #263136;
       }
     }
+  }
+  @media (max-width: 930px) {
+    display: none;
   }
 `;
 
