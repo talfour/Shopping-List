@@ -81,6 +81,18 @@ h2{
     background: #bf616a;
     color: white;
   }
+  @media (max-width: 930px) {
+.showListActive {
+    flex: 1 0 100%;
+    max-height: 500px;
+    opacity: 1;
+  }
+      .showListDisabled {
+        max-height: 0;
+        opacity: 0;
+  }
+  }
+
 `;
 
 export default GlobalStyle;

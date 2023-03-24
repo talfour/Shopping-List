@@ -12,7 +12,7 @@ const Home = () => {
   const [lists, setLists] = useState([]);
   const axiosPrivateInstance = useAxiosPrivate();
   const [activeList, setActiveList] = useState();
-  const [showList, setShowList] = useState(false);       
+  const [showList, setShowList] = useState(false);
 
   useEffect(() => {
     async function getShoppingLists() {
@@ -42,12 +42,16 @@ const Home = () => {
         setLists={setLists}
         activeList={activeList}
         setActiveList={setActiveList}
+        showList={showList}
+        setShowList={setShowList}
       />
       <ShoppingItems
         lists={lists}
         setLists={setLists}
         activeList={activeList}
         setActiveList={setActiveList}
+        showList={showList}
+        setShowList={setShowList}
       />
     </StyledMain>
   );
@@ -61,6 +65,8 @@ const StyledMain = styled(motion.div)`
   gap: 2rem;
   @media (max-width: 930px) {
     padding: 2rem 1rem;
+    flex-wrap: wrap;
+    gap: 0;
   }
 `;
 

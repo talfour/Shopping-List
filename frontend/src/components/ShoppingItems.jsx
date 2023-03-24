@@ -234,10 +234,7 @@ const ShoppingItems = ({ activeList, setActiveList, setLists, lists, showList, s
   }, [activeList]);
 
   return (
-    <StyledShoppingWrapper>
-      {showList && (
-        <div>Test</div>
-      )}
+    <StyledShoppingWrapper className={showList ? "listActive" : "listDisabled"}>
       <StyledNewList
         onClick={exitNewListHandler}
         className={addUserDialog ? "newListActive shadow" : "newListDisabled"}
@@ -375,6 +372,7 @@ const StyledMainShopping = styled.div`
     padding: 1rem 1rem;
     color: white;
   }
+
 `;
 
 const StyledShoppingWrapper = styled.div`

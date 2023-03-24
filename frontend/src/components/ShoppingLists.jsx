@@ -3,12 +3,16 @@ import styled from "styled-components";
 import { motion } from "framer-motion";
 import useAxiosPrivate from "../hooks/useAxiosPrivate";
 
-const ShoppingLists = ({ lists, setLists, setActiveList }) => {
+const ShoppingLists = ({
+  lists,
+  setLists,
+  setActiveList,
+  showList,
+}) => {
   const axiosPrivateInstance = useAxiosPrivate();
   const [isNewVisible, setIsNewVisible] = useState();
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-
 
   const shoppingListHandler = (e) => {
     const listID = e.target.dataset.tag;
@@ -44,7 +48,10 @@ const ShoppingLists = ({ lists, setLists, setActiveList }) => {
   };
 
   return (
-    <StyledShoppingList className={setShowList ? "showListActive": "showListDisabled"}>
+    <StyledShoppingList
+
+      className={showList ? "showListActive" : "showListDisabled"}
+    >
       <StyledNewList
         onClick={exitNewListHandler}
         className={isNewVisible ? "newListActive shadow" : "newListDisabled"}
@@ -107,9 +114,8 @@ const StyledShoppingList = styled.div`
       }
     }
   }
-  @media (max-width: 930px) {
-    display: none;
-  }
+  transition: opacity 0.3s ease, flex 0.5s ease, max-height 0.5s ease;
+
 `;
 
 const StyledListItem = styled.div`
@@ -128,6 +134,9 @@ const StyledListItem = styled.div`
   }
   :hover {
     background-color: #d3d3d3;
+  }
+  @media (max-width: 930px) {
+    flex: 1 0 100%;
   }
 `;
 
@@ -174,6 +183,11 @@ const Detail = styled(motion.div)`
     button {
       background-color: #37474f;
     }
+  }
+  @media (max-width: 930px) {
+    width: 80%;
+    left: 10%;
+    padding: 1rem 1rem;
   }
 `;
 export default ShoppingLists;
