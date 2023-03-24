@@ -16,13 +16,18 @@ JWT is used for authentication and it is stored in http-cookie.
 
 
 # Installation
-Clone the repository:
-`git clone https://github.com/talfour/Shopping-List.git`
-Build docker image:
-`docker-compose build`
-Run migrations:
-`docker-compose run --rm app sh -c "python manage.py makemigrations && python manage.py migrate"`
-Run tests:
-`docker-compose run --rm app sh -c "python manage.py test && flake8"`
-Run development server:
-`docker-compose up`
+Clone the repository:\
+`git clone https://github.com/talfour/Shopping-List.git`\
+Build docker image:\
+`docker-compose build`\
+Run migrations:\
+`docker-compose run --rm app sh -c "python manage.py makemigrations && python manage.py migrate"`\
+Run tests:\
+`docker-compose run --rm app sh -c "python manage.py test && flake8"`\
+Run development server:\
+`docker-compose up`\
+
+# Images:
+![alt text](https://raw.githubusercontent.com/talfour/Shopping-List/master/images/edit-item.png?token=GHSAT0AAAAAACAJQM2W2Z4MANZMQTUI6TCSZA5Y3ZA)
+![alt text](https://raw.githubusercontent.com/talfour/Shopping-List/master/images/main.png?token=GHSAT0AAAAAACAJQM2WLD3ZY2WYO5IKQKUYZA5Y5OA)
+![alt text](https://raw.githubusercontent.com/talfour/Shopping-List/master/images/mobile.png?token=GHSAT0AAAAAACAJQM2XQKZWYJ6EY7K63HEKZA5Y5VQ)
