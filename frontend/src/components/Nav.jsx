@@ -7,7 +7,7 @@ import useLogout from "../hooks/useLogout";
 import { useNavigate } from "react-router-dom";
 
 const Nav = () => {
-  const { user } = useAuth();
+  const { user, isLoggedIn } = useAuth();
   const logout = useLogout();
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate()
@@ -22,9 +22,9 @@ const Nav = () => {
       <Link to="/">
         <h1>Shopping List</h1>
       </Link>
-      {user?.name ? (
+      {isLoggedIn ? (
         <div>
-          <Link to="auth/user">{user?.name}</Link>
+          <Link to="auth/user">Your profile</Link>
           <button disabled={loading} type="button" onClick={handleLogout}>
             Logout
           </button>

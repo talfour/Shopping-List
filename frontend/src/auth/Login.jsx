@@ -5,10 +5,8 @@ import { axiosInstance } from "../axios";
 import styled from "styled-components";
 
 const Login = () => {
-  const { setAccessToken, setCSRFToken } = useAuth();
+  const { setAccessToken, setCSRFToken, setIsLoggedIn } = useAuth();
   const navigate = useNavigate();
-  const location = useLocation();
-  const fromLocation = location?.state?.from?.pathname || "/";
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -37,8 +35,8 @@ const Login = () => {
       setEmail("");
       setPassword("");
       setLoading(false);
-
-      navigate(fromLocation, { replace: true });
+      setIsLoggedIn(true);
+      navigate('/');
     } catch (error) {
       if (!error?.response) {
         setErrMsg("No Server Response");

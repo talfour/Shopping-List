@@ -8,7 +8,7 @@ import ShoppingItems from "../components/ShoppingItems";
 import sortFoodItemsByTypeAndName from "../Utils";
 
 const Home = () => {
-  const { user, setUser } = useAuth();
+  const { user, setUser, setIsLoggedIn } = useAuth();
   const [lists, setLists] = useState([]);
   const axiosPrivateInstance = useAxiosPrivate();
   const [activeList, setActiveList] = useState();
@@ -33,6 +33,7 @@ const Home = () => {
       }
     }
     getShoppingLists();
+    setIsLoggedIn(true);
   }, []);
 
   return (
