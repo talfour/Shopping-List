@@ -14,12 +14,6 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [errMsg, setErrMsg] = useState("");
 
-  const emailRef = useRef();
-
-  useEffect(() => {
-    emailRef.current.focus();
-  }, []);
-
   useEffect(() => {
     setErrMsg("");
   }, [email, password]);
@@ -70,7 +64,6 @@ const Login = () => {
             type="email"
             value={email}
             name="email"
-            ref={emailRef}
             autoComplete="off"
             onChange={(e) => setEmail(e.target.value)}
             required
