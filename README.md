@@ -25,7 +25,7 @@ Run migrations:\
 Run tests:\
 `docker-compose run --rm app sh -c "python manage.py test && flake8"`\
 Run development server:\
-`docker-compose up`\
+`docker-compose up`
 
 # Images:
 ![alt text](https://raw.githubusercontent.com/talfour/Shopping-List/master/images/edit-item.png?token=GHSAT0AAAAAACAJQM2W2Z4MANZMQTUI6TCSZA5Y3ZA)
